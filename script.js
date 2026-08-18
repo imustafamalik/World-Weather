@@ -117,24 +117,6 @@
         attribution: 'USGS National Map &mdash; Earth Resources'
       }
     },
-    usda_naip: {
-      name: 'USDA NAIP Aerial (US Only)',
-      provider: 'USDA Farm Production · 0.6–1 m Agricultural Ortho',
-      resolution: '0.6–1 m (US Aerial Ortho)',
-      nativeGSD: '0.6–1.0 m/px',
-      maxNativeZoom: 18,
-      detailTitle: 'Agricultural & Rural Land Use Detail:',
-      features: 'Crop parcel boundaries, field patterns, farm structures, rural roads and vegetation cover.',
-      sensorType: 'Airborne Agricultural',
-      optimalZoom: 'Zoom 11–18',
-      quality: 'high',
-      url: 'https://gis.apfo.usda.gov/arcgis/rest/services/NAIP/USDA_CONUS_PRIME/ImageServer/tile/{z}/{y}/{x}',
-      options: {
-        maxNativeZoom: 18,
-        maxZoom: 20,
-        attribution: '&copy; USDA Aerial Photography Field Office (NAIP)'
-      }
-    },
 
     // 2. Open & Government Earth Observation
     esa_sentinel2: {
@@ -1742,7 +1724,7 @@
     state.settings.mapLayer = layerKey;
 
     // US-Only datasets navigation prompt
-    if (layerKey === 'usda_naip' || layerKey === 'usgs_imagery') {
+    if (layerKey === 'usgs_imagery') {
       const center = state.map.getCenter();
       const inConus = (center.lat >= 24 && center.lat <= 50 && center.lng >= -125 && center.lng <= -65);
       if (!inConus) {
