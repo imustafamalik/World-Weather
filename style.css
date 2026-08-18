@@ -860,10 +860,10 @@ a:hover {
   gap: 4px;
 }
 
-/* Floating Controls Positioned in Map Canvas (Top Right) */
+/* Floating Controls Positioned in Map Canvas (Below Top Header) */
 .map-floating-controls {
   position: absolute;
-  top: 24px;
+  top: 96px;
   right: 20px;
   left: auto;
   bottom: auto;
