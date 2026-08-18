@@ -110,20 +110,22 @@
   <div class="app-split-container">
     <!-- Left Part: Permanent GIS Layer Manager & Live Legend Sidebar -->
     <aside id="gis-sidebar" class="gis-sidebar" aria-label="GIS Layer Manager and Map Legends">
-      <!-- Sidebar Title Header -->
+      <!-- Sidebar Header Title -->
       <div class="gis-sidebar-header">
         <div class="sidebar-title-wrap">
           <span class="sidebar-header-icon">🗺️</span>
-          <span class="sidebar-header-title">Layers &amp; Map Legend</span>
+          <span class="sidebar-header-title">GIS &amp; Map Layers</span>
         </div>
         <span class="sidebar-live-pill">LIVE FEED</span>
       </div>
 
-      <!-- Live GSD Resolution & Scale Telemetry Header -->
+      <!-- Live GSD Resolution & Scale Telemetry Header Card -->
       <div class="layer-menu-resolution-bar">
         <div class="res-bar-top">
-          <span class="res-bar-icon">🛰️</span>
-          <span class="res-bar-label">Ground Resolution:</span>
+          <div class="res-label-group">
+            <span class="res-bar-icon">🛰️</span>
+            <span class="res-bar-label">Ground GSD:</span>
+          </div>
           <span id="live-gsd-display" class="res-bar-value">-- m/px</span>
         </div>
         <div class="res-bar-telemetry">
@@ -132,13 +134,13 @@
         </div>
       </div>
 
-      <!-- Weather Pinpoint Click Interaction Mode Toggle -->
+      <!-- Weather Pinpoint Click Interaction Mode Toggle Card -->
       <div class="layer-mode-toggle-card">
         <div class="mode-toggle-left">
           <span class="mode-icon">🌦️</span>
           <div class="mode-text-wrap">
             <span class="mode-title">Weather Click Mode</span>
-            <span class="mode-desc">Click map to load forecast &amp; elevation</span>
+            <span class="mode-desc">Click map to inspect weather</span>
           </div>
         </div>
         <label class="layer-toggle-switch" for="toggle-weather-click-mode">
