@@ -147,74 +147,8 @@
         </label>
       </div>
 
-      <!-- Dedicated Scrollable Container for Legends and Layer Categories -->
+      <!-- Dedicated Scrollable Container for Layer Categories -->
       <div class="gis-sidebar-scrollable-body">
-        <!-- Section 0: Interactive Map Layers Legend & Visual Keys -->
-        <div class="layer-accordion-item open" data-accordion="legends">
-          <button class="layer-accordion-header" type="button">
-            <div class="accordion-title-wrap">
-              <span class="accordion-icon">📊</span>
-              <span class="accordion-title">Map Layers Legend &amp; Keys</span>
-            </div>
-            <span class="accordion-arrow">▼</span>
-          </button>
-          <div class="layer-accordion-content">
-            <!-- Earthquakes Legend Card -->
-            <div class="legend-card">
-              <div class="legend-card-title">🌋 USGS Earthquakes (Magnitude)</div>
-              <div class="legend-scale-dots">
-                <span class="legend-scale-item"><span class="legend-dot" style="background:#22c55e;"></span> &lt; M2.5</span>
-                <span class="legend-scale-item"><span class="legend-dot" style="background:#f59e0b;"></span> M2.5–4.4</span>
-                <span class="legend-scale-item"><span class="legend-dot" style="background:#f97316;"></span> M4.5–5.9</span>
-                <span class="legend-scale-item"><span class="legend-dot" style="background:#ef4444;"></span> M6.0+</span>
-              </div>
-            </div>
-
-            <!-- Doppler Rain Radar Legend Card -->
-            <div class="legend-card">
-              <div class="legend-card-title">🌧️ Doppler Rain &amp; Storm Radar (dBZ)</div>
-              <div class="legend-radar-gradient"></div>
-              <div class="legend-scale-labels">
-                <span>Light (15)</span>
-                <span>Mod (35)</span>
-                <span>Heavy (50)</span>
-                <span>Extreme (65+)</span>
-              </div>
-            </div>
-
-            <!-- Marine AIS Vessels Legend Card -->
-            <div class="legend-card">
-              <div class="legend-card-title">🚢 Marine AIS Vessels (Class)</div>
-              <div class="legend-chips-grid">
-                <span class="legend-chip" style="border-left: 3px solid #f59e0b;">🛢️ Tanker</span>
-                <span class="legend-chip" style="border-left: 3px solid #06b6d4;">📦 Container</span>
-                <span class="legend-chip" style="border-left: 3px solid #a855f7;">🛳️ Cruise</span>
-                <span class="legend-chip" style="border-left: 3px solid #3b82f6;">🏗️ Bulk Cargo</span>
-                <span class="legend-chip" style="border-left: 3px solid #10b981;">🎣 Fishing</span>
-                <span class="legend-chip" style="border-left: 3px solid #60a5fa;">⚓ Tugboat</span>
-              </div>
-            </div>
-
-            <!-- Active Wildfires Legend Card -->
-            <div class="legend-card">
-              <div class="legend-card-title">🔥 Wildfires &amp; Thermal Radiative Power</div>
-              <div class="legend-chips-grid">
-                <span class="legend-chip" style="border-left: 3px solid #f97316;">🔥 Flame (&gt;20 MW)</span>
-                <span class="legend-chip" style="border-left: 3px solid #ef4444;">🌡️ Flare (&gt;350 K)</span>
-              </div>
-            </div>
-
-            <!-- Flood Affected Areas & Inundation Legend Card -->
-            <div class="legend-card">
-              <div class="legend-card-title">🌊 Flood Inundation &amp; Affected Areas</div>
-              <div class="legend-chips-grid">
-                <span class="legend-chip" style="border-left: 3px solid #ef4444;">🚨 Critical (&gt;1.5m)</span>
-                <span class="legend-chip" style="border-left: 3px solid #f59e0b;">⚠️ Warning (&gt;0.5m)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Accordion Section 1: Basemaps & Vector World (Default: OpenStreetMap Standard Street Map) -->
         <div class="layer-accordion-item open" data-accordion="basemaps">
           <button class="layer-accordion-header" type="button">
