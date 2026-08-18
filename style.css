@@ -643,17 +643,23 @@ a:hover {
   z-index: 100;
 }
 
-/* Layer Menu Live Ground Resolution Bar */
+/* Layer Menu Live Ground Resolution & Scale Telemetry */
 .layer-menu-resolution-bar {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
   background: rgba(6, 182, 212, 0.12);
   border: 1px solid rgba(6, 182, 212, 0.3);
   border-radius: var(--radius-sm);
   font-size: 11px;
   margin-bottom: 4px;
+}
+
+.res-bar-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .res-bar-icon {
@@ -670,6 +676,23 @@ a:hover {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
   color: var(--cyan-400);
+}
+
+.res-bar-telemetry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.res-telemetry-tag {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
 }
 
 /* Layer Category Header */
@@ -726,6 +749,9 @@ a:hover {
 .layer-indicator.google-indicator { background: #34d399; }
 .layer-indicator.clarity-indicator { background: #60a5fa; }
 .layer-indicator.labels-indicator { background: #a78bfa; }
+.layer-indicator.esa-indicator { background: #10b981; }
+.layer-indicator.landsat-indicator { background: #06b6d4; }
+.layer-indicator.naip-indicator { background: #eab308; }
 .layer-indicator.nasa-indicator { background: var(--amber-400); }
 .layer-indicator.topo-indicator { background: #f472b6; }
 .layer-indicator.dark-indicator { background: #64748b; }
@@ -786,26 +812,336 @@ a:hover {
   cursor: pointer;
 }
 
-/* Layer Menu Zoom 1m Button */
-.layer-zoom-1m-btn {
+/* Layer Menu Action Buttons */
+.layer-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.layer-zoom-1m-btn, .layer-download-tiles-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 7px 10px;
-  margin-top: 4px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25));
-  border: 1px solid var(--cyan-500);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
   font-size: 11px;
   font-weight: 600;
   transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.layer-zoom-1m-btn {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25));
+  border: 1px solid var(--cyan-500);
+  color: var(--text-primary);
 }
 
 .layer-zoom-1m-btn:hover {
   background: var(--cyan-500);
   color: var(--text-inverse);
+}
+
+.layer-download-tiles-btn {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: var(--emerald-400);
+}
+
+.layer-download-tiles-btn:hover {
+  background: var(--emerald-500);
+  color: var(--text-inverse);
+}
+
+/* ----------------- Floating GIS Scale & Telemetry HUD ----------------- */
+.gis-telemetry-hud {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  pointer-events: auto;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.gis-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: var(--bg-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-glass);
+}
+
+.gis-hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.gis-hud-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--cyan-400);
+  letter-spacing: 0.05em;
+}
+
+.gis-hud-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gis-hud-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border-subtle);
+}
+
+.gis-hud-scalebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scalebar-line {
+  width: 45px;
+  height: 4px;
+  border-bottom: 2px solid var(--cyan-400);
+  border-left: 2px solid var(--cyan-400);
+  border-right: 2px solid var(--cyan-400);
+}
+
+.scalebar-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* ----------------- Tile Downloader Modal ----------------- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  position: relative;
+  z-index: 1001;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-dropdown);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--emerald-400);
+}
+
+.modal-title-group h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.tile-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.tile-info-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.tile-info-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tile-info-val.highlight {
+  color: var(--emerald-400);
+}
+
+.tile-safety-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--amber-400);
+  font-size: 12px;
+}
+
+.safety-icon {
+  font-size: 18px;
+}
+
+.safety-text strong {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.safety-text p {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.dl-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+.dl-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dl-progress-status {
+  color: var(--text-secondary);
+}
+
+.dl-progress-percent {
+  color: var(--emerald-400);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+}
+
+.dl-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dl-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #06b6d4 100%);
+  border-radius: 4px;
+  transition: width 0.15s ease;
+}
+
+.dl-progress-detail {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.primary-action-btn, .secondary-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.primary-action-btn {
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  color: #070a12;
+  font-weight: 700;
+}
+
+.primary-action-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.secondary-action-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.secondary-action-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
 }
 
 /* ----------------- Satellite Intelligence Card ----------------- */

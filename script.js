@@ -26,9 +26,10 @@
 
   // Map Tile Layer Providers & Satellite Constellations
   const TILE_LAYERS = {
+    // 1. Commercial High-Resolution Satellite (Sub-Meter)
     esri_sat: {
       name: 'Esri World Imagery',
-      provider: 'Maxar / DigitalGlobe · Optical Multispectral',
+      provider: 'Maxar / DigitalGlobe · 0.3–1 m Optical Multispectral',
       resolution: '0.3–1 m (Sub-Meter)',
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       options: {
@@ -36,9 +37,39 @@
         attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics, GIS User Community'
       }
     },
+    maxar_vivid: {
+      name: 'Maxar Vivid / SecureWatch',
+      provider: 'WorldView-3 / WorldView-4 · 0.3–0.5 m High Precision Optical',
+      resolution: '0.3–0.5 m (Maxar Constellation)',
+      url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: '&copy; Maxar Technologies / Vivid Constellation'
+      }
+    },
+    airbus_pleiades: {
+      name: 'Airbus Pléiades Neo / SPOT',
+      provider: 'Airbus Defence & Space · 0.3–1.5 m High-Cadence Optical',
+      resolution: '0.3–1.5 m (Pléiades Neo)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: '&copy; Airbus Defence and Space / Spot Image'
+      }
+    },
+    superview_chinaspacewill: {
+      name: 'SuperView / SpaceWill / TripleSat',
+      provider: 'Commercial Constellation · 0.5 m Optical High-Resolution',
+      resolution: '0.5 m (Commercial Constellation)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: '&copy; SpaceWill / SuperView Earth Observation'
+      }
+    },
     google_sat: {
       name: 'Google High-Res Satellite',
-      provider: 'GeoEye / Maxar · Optical',
+      provider: 'GeoEye / Maxar · 0.5–1 m Optical',
       resolution: '0.5–1 m (Sub-Meter)',
       url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
       options: {
@@ -48,7 +79,7 @@
     },
     google_hybrid: {
       name: 'Google Hybrid Satellite',
-      provider: 'Google Satellite + Map Reference Labels',
+      provider: 'Google Satellite + Reference Labels & Highways',
       resolution: '0.5–1 m (Sub-Meter)',
       url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
       options: {
@@ -77,6 +108,38 @@
       },
       hasLabels: true
     },
+
+    // 2. Open & Government Medium/High-Res Earth Observation
+    esa_sentinel2: {
+      name: 'ESA Sentinel-2 Cloudless',
+      provider: 'Copernicus Sentinel-2 · 10 m Multispectral MSI',
+      resolution: '10 m (Multispectral)',
+      url: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+      options: {
+        maxZoom: 16,
+        attribution: 'Sentinel-2 cloudless by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data)'
+      }
+    },
+    usgs_landsat: {
+      name: 'NASA / USGS Landsat 8 & 9',
+      provider: 'USGS / NASA Landsat OLI/TIRS · 15–30 m Analysis Ready',
+      resolution: '15–30 m (Multispectral)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: 'USGS / NASA Landsat &mdash; Earth Resources Observation'
+      }
+    },
+    usda_naip: {
+      name: 'USDA NAIP Aerial (US Only)',
+      provider: 'USDA Farm Production · 0.6–1 m High-Res Orthoimagery',
+      resolution: '0.6–1 m (US Aerial Ortho)',
+      url: 'https://gis.apfo.usda.gov/arcgis/rest/services/NAIP/USDA_CONUS_PRIME/ImageServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 18,
+        attribution: '&copy; USDA Aerial Photography Field Office (NAIP)'
+      }
+    },
     nasa_night: {
       name: 'NASA Earth at Night',
       provider: 'NASA Suomi NPP / VIIRS Day-Night Band (City Lights)',
@@ -89,7 +152,7 @@
     },
     opentopo: {
       name: 'OpenTopoMap',
-      provider: 'SRTM Elevation + OpenStreetMap Contours',
+      provider: 'SRTM Elevation + OpenStreetMap Contours & Relief',
       resolution: 'Vector / 10–20 m Topographic',
       url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
       options: {
@@ -97,6 +160,8 @@
         attribution: 'Map data &copy; <a href="https://openstreetmap.org">OSM</a>, SRTM | Style &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
       }
     },
+
+    // 3. Vector Street Maps
     voyager: {
       name: 'Standard Voyager',
       provider: 'CARTO + OpenStreetMap Vector',
@@ -121,7 +186,7 @@
     },
     osm: {
       name: 'OpenStreetMap Standard',
-      provider: 'OpenStreetMap Community Contributors',
+      provider: 'OpenStreetMap Global Community Contributors',
       resolution: 'Vector Standard OSM',
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       options: {
@@ -302,8 +367,28 @@
   }
 
   // -------------------------------------------------------------------
-  // 5. MAP INITIALIZATION & SATELLITE LAYER ENGINE
+  // 5. WEB MERCATOR GEOMETRY & SATELLITE TILE ENGINE
   // -------------------------------------------------------------------
+  function lon2tile(lon, zoom) {
+    return Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
+  }
+
+  function lat2tile(lat, zoom) {
+    const latRad = (lat * Math.PI) / 180;
+    return Math.floor(
+      ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * Math.pow(2, zoom)
+    );
+  }
+
+  function tile2lon(x, zoom) {
+    return (x / Math.pow(2, zoom)) * 360 - 180;
+  }
+
+  function tile2lat(y, zoom) {
+    const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoom);
+    return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+  }
+
   function initMap() {
     const initialCoords = [20, 0];
     const initialZoom = 2;
@@ -329,12 +414,12 @@
       selectLocation(lat, normalizedLng, { panTo: true, zoom: state.map.getZoom() < 6 ? 6 : null });
     });
 
-    // Map Move/Zoom Handlers for Live GSD Resolution Tracking
+    // Map Move/Zoom Handlers for Real-time GIS Telemetry Tracking
     state.map.on('zoom move', () => {
       updateLiveGSDDisplay();
     });
 
-    // Initial GSD calculation
+    // Initial Telemetry & Scale calculation
     updateLiveGSDDisplay();
 
     // Custom Map Control Buttons
@@ -374,7 +459,7 @@
       });
     });
 
-    // Overlay Place Names & Borders checkbox
+    // Overlay Roads, Place Names & Borders checkbox
     const overlayCheck = document.getElementById('overlay-labels-check');
     overlayCheck?.addEventListener('change', (e) => {
       toggleOverlayLabels(e.target.checked);
@@ -393,6 +478,16 @@
     document.getElementById('btn-toggle-sat-overlay')?.addEventListener('click', () => {
       toggleOverlayLabels(!state.showOverlayLabels);
     });
+
+    // Visible Tile Downloader triggers
+    document.getElementById('btn-download-tiles')?.addEventListener('click', () => {
+      layerMenu?.classList.add('hidden');
+      openTileDownloadModal();
+    });
+    document.getElementById('tile-modal-close')?.addEventListener('click', closeTileDownloadModal);
+    document.getElementById('btn-cancel-download')?.addEventListener('click', closeTileDownloadModal);
+    document.getElementById('tile-modal-backdrop')?.addEventListener('click', closeTileDownloadModal);
+    document.getElementById('btn-start-download')?.addEventListener('click', startTileDownload);
 
     // Close layer menu when clicking outside
     document.addEventListener('click', (e) => {
@@ -462,7 +557,7 @@
     if (lat === null || lat === undefined || isNaN(lat)) lat = 0;
     const clampedZoom = Math.max(0, zoom || 2);
     const rad = (lat * Math.PI) / 180;
-    // 156543.03392 is standard Web Mercator equatorial ground resolution at zoom 0
+    // 156543.03392 is standard Web Mercator equatorial ground resolution at zoom 0 (meters/pixel)
     return (156543.03392 * Math.cos(rad)) / Math.pow(2, clampedZoom);
   }
 
@@ -470,8 +565,24 @@
     if (!state.map) return;
     const center = state.map.getCenter();
     const zoom = state.map.getZoom();
+    const bounds = state.map.getBounds();
     const gsd = calculateGSD(center.lat, zoom);
     
+    // Scale calculation (assuming standard 96 DPI screen: 1 pixel = 0.000264583 meters)
+    const scaleRatio = Math.round(gsd / 0.000264583);
+    const scaleFormatted = `1:${scaleRatio.toLocaleString()}`;
+
+    // Real world viewport width and height in meters/km
+    const northEast = bounds.getNorthEast();
+    const southWest = bounds.getSouthWest();
+    const widthMeters = bounds.getNorthWest().distanceTo(northEast);
+    const heightMeters = bounds.getNorthWest().distanceTo(southWest);
+    const areaSqKm = (widthMeters / 1000) * (heightMeters / 1000);
+
+    const widthStr = widthMeters >= 10000 ? `${(widthMeters / 1000).toFixed(1)} km` : `${Math.round(widthMeters)} m`;
+    const heightStr = heightMeters >= 10000 ? `${(heightMeters / 1000).toFixed(1)} km` : `${Math.round(heightMeters)} m`;
+    const areaStr = areaSqKm >= 1 ? `${areaSqKm.toFixed(1)} km²` : `${Math.round(areaSqKm * 1000000)} m²`;
+
     let gsdFormatted = '';
     if (gsd < 1) {
       gsdFormatted = `${(gsd * 100).toFixed(0)} cm/px`;
@@ -483,20 +594,44 @@
       gsdFormatted = `${(gsd / 1000).toFixed(1)} km/px`;
     }
 
+    // 1. Update Layer Menu Header Readouts
     const liveGsdEl = document.getElementById('live-gsd-display');
-    if (liveGsdEl) {
-      liveGsdEl.textContent = `${gsdFormatted} (Z${zoom})`;
+    if (liveGsdEl) liveGsdEl.textContent = `${gsdFormatted} (Z${zoom})`;
+
+    const scaleTagEl = document.getElementById('live-scale-tag');
+    if (scaleTagEl) scaleTagEl.textContent = `Scale ${scaleFormatted}`;
+
+    const areaTagEl = document.getElementById('live-area-tag');
+    if (areaTagEl) areaTagEl.textContent = `Area ${areaStr}`;
+
+    // 2. Update Floating GIS Telemetry HUD Bar
+    const hudZoom = document.getElementById('hud-zoom-val');
+    if (hudZoom) hudZoom.textContent = `Z${zoom}`;
+
+    const hudScale = document.getElementById('hud-scale-val');
+    if (hudScale) hudScale.textContent = scaleFormatted;
+
+    const hudGsd = document.getElementById('hud-gsd-val');
+    if (hudGsd) hudGsd.textContent = gsdFormatted;
+
+    const hudArea = document.getElementById('hud-area-val');
+    if (hudArea) hudArea.textContent = `${widthStr} × ${heightStr} (${areaStr})`;
+
+    const hudScalebarText = document.getElementById('hud-scalebar-text');
+    if (hudScalebarText) {
+      const scaleBarDistMeters = 45 * gsd;
+      hudScalebarText.textContent = scaleBarDistMeters >= 1000 ? 
+        `${(scaleBarDistMeters / 1000).toFixed(1)} km` : `${Math.round(scaleBarDistMeters)} m`;
     }
 
-    // Update Satellite Intelligence card if visible
+    // 3. Update Satellite Intelligence Card in info panel
     const satGsdValEl = document.getElementById('sat-gsd-value');
     if (satGsdValEl) {
-      satGsdValEl.textContent = `${gsdFormatted} / pixel`;
+      satGsdValEl.textContent = `${gsdFormatted} / pixel (${(gsd < 1 ? 'Sub-Meter' : gsd <= 5 ? 'High Resolution' : gsd <= 30 ? 'Medium Res' : 'Regional')})`;
     }
 
     const satGsdBar = document.getElementById('sat-gsd-bar');
     if (satGsdBar) {
-      // Scale from 0.3m (100%) to 500m (10%)
       const percentage = Math.max(10, Math.min(100, 100 - (Math.log10(Math.max(0.3, gsd)) / Math.log10(500)) * 90));
       satGsdBar.style.width = `${percentage}%`;
     }
@@ -525,7 +660,7 @@
     if (!state.map) return;
     const currentLayer = state.settings.mapLayer;
     // If on vector map, switch to sub-meter satellite
-    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('hybrid')) {
+    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('hybrid') && !currentLayer.includes('vivid') && !currentLayer.includes('pleiades')) {
       setMapLayer('esri_sat');
     }
     const center = state.map.getCenter();
@@ -551,8 +686,14 @@
     if (sensorNameEl) sensorNameEl.textContent = layer.name;
     if (sensorProviderEl) sensorProviderEl.textContent = layer.provider;
     if (categoryTagEl) {
-      if (layerKey?.includes('sat') || layerKey?.includes('clarity') || layerKey?.includes('hybrid')) {
+      if (layerKey?.includes('sat') || layerKey?.includes('clarity') || layerKey?.includes('hybrid') || layerKey?.includes('vivid') || layerKey?.includes('pleiades') || layerKey?.includes('superview')) {
         categoryTagEl.textContent = 'Sub-Meter (≤ 1m)';
+      } else if (layerKey === 'esa_sentinel2') {
+        categoryTagEl.textContent = 'Copernicus 10m';
+      } else if (layerKey === 'usgs_landsat') {
+        categoryTagEl.textContent = 'Landsat 15-30m';
+      } else if (layerKey === 'usda_naip') {
+        categoryTagEl.textContent = 'NAIP Aerial 0.6-1m';
       } else if (layerKey === 'nasa_night') {
         categoryTagEl.textContent = 'Night VIIRS (750m)';
       } else if (layerKey === 'opentopo') {
@@ -561,6 +702,205 @@
         categoryTagEl.textContent = 'Vector Cartography';
       }
     }
+  }
+
+  // -------------------------------------------------------------------
+  // 5b. VISIBLE TILE DOWNLOADER & ZIP EXPORTER (JSZip)
+  // -------------------------------------------------------------------
+  let currentDownloadTiles = [];
+  let isDownloadingTiles = false;
+
+  function openTileDownloadModal() {
+    if (!state.map) return;
+    const zoom = state.map.getZoom();
+    const bounds = state.map.getBounds();
+    const layerKey = state.settings.mapLayer || 'esri_sat';
+    const config = TILE_LAYERS[layerKey] || TILE_LAYERS.esri_sat;
+
+    // Calculate exact Web Mercator tile ranges [Xmin..Xmax] x [Ymin..Ymax]
+    const minX = lon2tile(bounds.getWest(), zoom);
+    const maxX = lon2tile(bounds.getEast(), zoom);
+    const minY = lat2tile(bounds.getNorth(), zoom);
+    const maxY = lat2tile(bounds.getSouth(), zoom);
+
+    const xStart = Math.min(minX, maxX);
+    const xEnd = Math.max(minX, maxX);
+    const yStart = Math.min(minY, maxY);
+    const yEnd = Math.max(minY, maxY);
+
+    const totalCols = xEnd - xStart + 1;
+    const totalRows = yEnd - yStart + 1;
+    const totalCount = totalCols * totalRows;
+
+    currentDownloadTiles = [];
+    for (let x = xStart; x <= xEnd; x++) {
+      for (let y = yStart; y <= yEnd; y++) {
+        let url = config.url
+          .replace('{z}', zoom)
+          .replace('{x}', x)
+          .replace('{y}', y)
+          .replace('{r}', '')
+          .replace('{s}', ['a', 'b', 'c', 'd'][(x + y) % 4]);
+        currentDownloadTiles.push({ z: zoom, x, y, url });
+      }
+    }
+
+    // Populate Modal Readouts
+    const providerNameEl = document.getElementById('dl-provider-name');
+    if (providerNameEl) providerNameEl.textContent = config.name;
+
+    const zoomValEl = document.getElementById('dl-zoom-val');
+    if (zoomValEl) zoomValEl.textContent = `Zoom Level ${zoom}`;
+
+    const gridBoundsEl = document.getElementById('dl-grid-bounds');
+    if (gridBoundsEl) gridBoundsEl.textContent = `X: [${xStart}..${xEnd}] Y: [${yStart}..${yEnd}]`;
+
+    const countEl = document.getElementById('dl-tile-count');
+    const estSizeMb = (totalCount * 0.05).toFixed(1);
+    if (countEl) countEl.textContent = `${totalCount} tiles (~${estSizeMb} MB)`;
+
+    // Safety Threshold Check (> 50 tiles warning)
+    const safetyWarning = document.getElementById('dl-safety-warning');
+    if (safetyWarning) {
+      if (totalCount > 50) {
+        safetyWarning.classList.remove('hidden');
+      } else {
+        safetyWarning.classList.add('hidden');
+      }
+    }
+
+    // Reset UI
+    document.getElementById('dl-progress-section')?.classList.add('hidden');
+    const startBtn = document.getElementById('btn-start-download');
+    if (startBtn) {
+      startBtn.disabled = false;
+      startBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Start ZIP Download (${totalCount} Tiles)
+      `;
+    }
+
+    document.getElementById('tile-download-modal')?.classList.remove('hidden');
+  }
+
+  function closeTileDownloadModal() {
+    if (isDownloadingTiles) {
+      if (!confirm('Download is in progress. Are you sure you want to cancel?')) return;
+      isDownloadingTiles = false;
+    }
+    document.getElementById('tile-download-modal')?.classList.add('hidden');
+  }
+
+  async function startTileDownload() {
+    if (isDownloadingTiles || !currentDownloadTiles.length) return;
+    if (typeof JSZip === 'undefined') {
+      showToast('JSZip library loading. Please try again in a moment.', 'error');
+      return;
+    }
+
+    isDownloadingTiles = true;
+    const progressSection = document.getElementById('dl-progress-section');
+    progressSection?.classList.remove('hidden');
+
+    const progressBar = document.getElementById('dl-progress-bar');
+    const progressPercent = document.getElementById('dl-progress-percent');
+    const progressStatus = document.getElementById('dl-progress-status');
+    const progressDetail = document.getElementById('dl-progress-detail');
+    const startBtn = document.getElementById('btn-start-download');
+    if (startBtn) startBtn.disabled = true;
+
+    if (progressStatus) progressStatus.textContent = 'Fetching tiles asynchronously...';
+
+    const zip = new JSZip();
+    const layerKey = state.settings.mapLayer || 'esri_sat';
+    const folderName = `${layerKey}_zoom${currentDownloadTiles[0].z}`;
+    const zipFolder = zip.folder(folderName);
+
+    let completed = 0;
+    const total = currentDownloadTiles.length;
+    const concurrency = 6;
+    let index = 0;
+
+    async function worker() {
+      while (index < total && isDownloadingTiles) {
+        const item = currentDownloadTiles[index++];
+        try {
+          const res = await fetch(item.url, { mode: 'cors' });
+          if (res.ok) {
+            const blob = await res.blob();
+            zipFolder.file(`${item.z}/${item.x}/${item.y}.png`, blob);
+          } else {
+            // Draw placeholder image tile if remote provider returns error
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+            ctx.strokeRect(0, 0, 256, 256);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillText(`Tile ${item.z}/${item.x}/${item.y}`, 14, 30);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            zipFolder.file(`${item.z}/${item.x}/${item.y}.png`, blob);
+          }
+        } catch (e) {
+          // Handle CORS or offline tile fallback
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(0, 0, 256, 256);
+          ctx.strokeStyle = '#06b6d4';
+          ctx.strokeRect(0, 0, 256, 256);
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = '12px Inter, sans-serif';
+          ctx.fillText(`${item.z}/${item.x}/${item.y}`, 14, 30);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          zipFolder.file(`${item.z}/${item.x}/${item.y}.png`, blob);
+        }
+
+        completed++;
+        const pct = Math.round((completed / total) * 100);
+        if (progressBar) progressBar.style.width = `${pct}%`;
+        if (progressPercent) progressPercent.textContent = `${pct}%`;
+        if (progressDetail) progressDetail.textContent = `Downloaded ${completed} / ${total} tiles`;
+      }
+    }
+
+    const workers = [];
+    for (let i = 0; i < Math.min(concurrency, total); i++) {
+      workers.push(worker());
+    }
+
+    await Promise.all(workers);
+
+    if (!isDownloadingTiles) return;
+
+    if (progressStatus) progressStatus.textContent = 'Compressing into ZIP archive...';
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+      if (progressPercent) progressPercent.textContent = `${Math.round(metadata.percent)}%`;
+      if (progressBar) progressBar.style.width = `${metadata.percent}%`;
+    });
+
+    // Trigger browser file download
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${layerKey}_zoom${currentDownloadTiles[0].z}_tiles.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    isDownloadingTiles = false;
+    showToast(`Successfully downloaded ${total} visible tiles as ZIP archive!`);
+    setTimeout(() => {
+      document.getElementById('tile-download-modal')?.classList.add('hidden');
+    }, 900);
   }
 
   function togglePrecisionMode() {

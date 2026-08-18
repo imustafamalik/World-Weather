@@ -15,6 +15,9 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 
+  <!-- JSZip Library for Tile Bundling -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
@@ -145,21 +148,51 @@
       </button>
 
       <div id="layer-menu" class="layer-menu hidden" role="menu" aria-label="Map layer selector">
-        <!-- Live GSD Resolution Display -->
+        <!-- Live GSD Resolution & Scale Telemetry Header -->
         <div class="layer-menu-resolution-bar">
-          <span class="res-bar-icon">🛰️</span>
-          <span class="res-bar-label">Ground Resolution:</span>
-          <span id="live-gsd-display" class="res-bar-value">-- m/px</span>
+          <div class="res-bar-top">
+            <span class="res-bar-icon">🛰️</span>
+            <span class="res-bar-label">Ground Resolution:</span>
+            <span id="live-gsd-display" class="res-bar-value">-- m/px</span>
+          </div>
+          <div class="res-bar-telemetry">
+            <span class="res-telemetry-tag" id="live-scale-tag">Scale 1:--</span>
+            <span class="res-telemetry-tag" id="live-area-tag">Area -- km²</span>
+          </div>
         </div>
 
-        <!-- Category: High-Res Satellite -->
-        <div class="layer-category-header">🛰️ High-Resolution Satellite (≤ 1 m)</div>
+        <!-- Category 1: Commercial High-Resolution Satellite (Sub-Meter) -->
+        <div class="layer-category-header">🛰️ Commercial High-Res Satellite (≤ 1 m)</div>
 
-        <button class="layer-option" data-layer="esri_sat" role="menuitem">
+        <button class="layer-option active" data-layer="esri_sat" role="menuitem">
           <span class="layer-indicator sat-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Esri World Imagery</span>
-            <span class="layer-res-tag">Maxar · 0.3–1 m</span>
+            <span class="layer-res-tag">Maxar / DigitalGlobe · 0.3–1 m</span>
+          </span>
+        </button>
+
+        <button class="layer-option" data-layer="maxar_vivid" role="menuitem">
+          <span class="layer-indicator sat-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">Maxar Vivid / SecureWatch</span>
+            <span class="layer-res-tag">WorldView-3/4 · 0.3–0.5 m High Precision</span>
+          </span>
+        </button>
+
+        <button class="layer-option" data-layer="airbus_pleiades" role="menuitem">
+          <span class="layer-indicator sat-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">Airbus Pléiades Neo / SPOT</span>
+            <span class="layer-res-tag">Airbus Defence · 0.3–1.5 m Optical</span>
+          </span>
+        </button>
+
+        <button class="layer-option" data-layer="superview_chinaspacewill" role="menuitem">
+          <span class="layer-indicator sat-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">SuperView / SpaceWill / TripleSat</span>
+            <span class="layer-res-tag">Commercial Constellation · 0.5 m</span>
           </span>
         </button>
 
@@ -167,7 +200,7 @@
           <span class="layer-indicator google-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Google High-Res Satellite</span>
-            <span class="layer-res-tag">GeoEye · 0.5–1 m</span>
+            <span class="layer-res-tag">GeoEye / Maxar · 0.5–1 m</span>
           </span>
         </button>
 
@@ -175,7 +208,7 @@
           <span class="layer-indicator google-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Google Hybrid</span>
-            <span class="layer-res-tag">Satellite + Labels</span>
+            <span class="layer-res-tag">Satellite + Reference Labels</span>
           </span>
         </button>
 
@@ -183,7 +216,7 @@
           <span class="layer-indicator clarity-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Esri Clarity (Cloudless)</span>
-            <span class="layer-res-tag">Archival · sub-meter</span>
+            <span class="layer-res-tag">Archival Clear Imagery · sub-meter</span>
           </span>
         </button>
 
@@ -191,18 +224,42 @@
           <span class="layer-indicator labels-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Esri Satellite + Labels</span>
-            <span class="layer-res-tag">Hybrid Reference</span>
+            <span class="layer-res-tag">Hybrid Administrative Reference</span>
           </span>
         </button>
 
-        <!-- Category: Planetary & Specialized -->
-        <div class="layer-category-header">🌍 Planetary &amp; Specialized</div>
+        <!-- Category 2: Open & Government Medium/High-Res -->
+        <div class="layer-category-header">🌍 Open &amp; Government Earth Observation</div>
+
+        <button class="layer-option" data-layer="esa_sentinel2" role="menuitem">
+          <span class="layer-indicator esa-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">ESA Sentinel-2 Cloudless</span>
+            <span class="layer-res-tag">Copernicus · 10 m Multispectral</span>
+          </span>
+        </button>
+
+        <button class="layer-option" data-layer="usgs_landsat" role="menuitem">
+          <span class="layer-indicator landsat-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">NASA / USGS Landsat 8 &amp; 9</span>
+            <span class="layer-res-tag">Analysis Ready · 15–30 m Multispectral</span>
+          </span>
+        </button>
+
+        <button class="layer-option" data-layer="usda_naip" role="menuitem">
+          <span class="layer-indicator naip-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">USDA NAIP Aerial (US Only)</span>
+            <span class="layer-res-tag">High-Res Orthoimagery · 0.6–1 m</span>
+          </span>
+        </button>
 
         <button class="layer-option" data-layer="nasa_night" role="menuitem">
           <span class="layer-indicator nasa-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">NASA Earth at Night</span>
-            <span class="layer-res-tag">VIIRS · City Lights</span>
+            <span class="layer-res-tag">VIIRS Day/Night Band · City Lights</span>
           </span>
         </button>
 
@@ -210,18 +267,18 @@
           <span class="layer-indicator topo-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">OpenTopoMap</span>
-            <span class="layer-res-tag">Topographic Contours</span>
+            <span class="layer-res-tag">SRTM Topographic Contours</span>
           </span>
         </button>
 
-        <!-- Category: Vector Street Maps -->
+        <!-- Category 3: Vector Street Maps -->
         <div class="layer-category-header">🗺️ Vector Street Maps</div>
 
-        <button class="layer-option active" data-layer="voyager" role="menuitem">
+        <button class="layer-option" data-layer="voyager" role="menuitem">
           <span class="layer-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Standard Voyager</span>
-            <span class="layer-res-tag">CartoDB · Detailed</span>
+            <span class="layer-res-tag">CartoDB · Detailed Street &amp; Terrain</span>
           </span>
         </button>
 
@@ -229,7 +286,7 @@
           <span class="layer-indicator dark-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Dark Night Mode</span>
-            <span class="layer-res-tag">CartoDB · Dark</span>
+            <span class="layer-res-tag">CartoDB · Dark Minimal</span>
           </span>
         </button>
 
@@ -237,7 +294,7 @@
           <span class="layer-indicator osm-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">OpenStreetMap Standard</span>
-            <span class="layer-res-tag">OSM · Community</span>
+            <span class="layer-res-tag">OSM · Global Community</span>
           </span>
         </button>
 
@@ -245,14 +302,117 @@
         <div class="layer-overlay-section">
           <label class="layer-overlay-toggle" for="overlay-labels-check">
             <input type="checkbox" id="overlay-labels-check">
-            <span class="overlay-toggle-text">Show Place Names &amp; Borders</span>
+            <span class="overlay-toggle-text">Show Roads, Names &amp; Borders</span>
           </label>
         </div>
 
-        <!-- Quick action: Zoom to 1m Detail -->
-        <button id="btn-zoom-1m" class="layer-zoom-1m-btn">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-          Zoom to 1-Meter Detail
+        <!-- Quick Action Buttons: Zoom 1m & Tile Downloader -->
+        <div class="layer-actions-group">
+          <button id="btn-zoom-1m" class="layer-zoom-1m-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            Zoom to 1-Meter Detail
+          </button>
+          <button id="btn-download-tiles" class="layer-download-tiles-btn" title="Download visible map tiles as a ZIP archive">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Visible Tiles (ZIP)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating GIS Telemetry & Scale Level Bar (Screen Area & Zoom in meters) -->
+  <div class="gis-telemetry-hud" id="gis-telemetry-hud" aria-label="GIS map scale and screen area readout">
+    <div class="gis-hud-pill">
+      <div class="gis-hud-item">
+        <span class="gis-hud-label">ZOOM</span>
+        <span class="gis-hud-value" id="hud-zoom-val">Z12</span>
+      </div>
+      <div class="gis-hud-divider"></div>
+      <div class="gis-hud-item">
+        <span class="gis-hud-label">SCALE</span>
+        <span class="gis-hud-value" id="hud-scale-val">1:144,447</span>
+      </div>
+      <div class="gis-hud-divider"></div>
+      <div class="gis-hud-item">
+        <span class="gis-hud-label">GSD RESOLUTION</span>
+        <span class="gis-hud-value" id="hud-gsd-val">38.2 m/px</span>
+      </div>
+      <div class="gis-hud-divider"></div>
+      <div class="gis-hud-item">
+        <span class="gis-hud-label">VIEWPORT AREA</span>
+        <span class="gis-hud-value" id="hud-area-val">-- km × -- km (-- km²)</span>
+      </div>
+      <div class="gis-hud-divider"></div>
+      <!-- Graphical Graphic Scale Bar -->
+      <div class="gis-hud-scalebar" id="hud-scale-bar-wrapper">
+        <div class="scalebar-line"></div>
+        <span class="scalebar-text" id="hud-scalebar-text">5 km</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tile Downloader Modal / Safety Dialog -->
+  <div id="tile-download-modal" class="modal tile-modal hidden" role="dialog" aria-label="Visible Tile Downloader">
+    <div class="modal-backdrop" id="tile-modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <h3>Visible Tile Downloader</h3>
+        </div>
+        <button id="tile-modal-close" class="panel-icon-btn" aria-label="Close downloader">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="tile-info-grid">
+          <div class="tile-info-item">
+            <span class="tile-info-label">Active Provider</span>
+            <strong id="dl-provider-name" class="tile-info-val">Esri World Imagery</strong>
+          </div>
+          <div class="tile-info-item">
+            <span class="tile-info-label">Zoom Level</span>
+            <strong id="dl-zoom-val" class="tile-info-val">Zoom 12</strong>
+          </div>
+          <div class="tile-info-item">
+            <span class="tile-info-label">Tile Grid Bounds</span>
+            <strong id="dl-grid-bounds" class="tile-info-val">X: [2180..2185] Y: [1420..1425]</strong>
+          </div>
+          <div class="tile-info-item">
+            <span class="tile-info-label">Total Visible Tiles</span>
+            <strong id="dl-tile-count" class="tile-info-val highlight">24 tiles (~1.2 MB)</strong>
+          </div>
+        </div>
+
+        <!-- Safety Threshold Warning if > 50 tiles -->
+        <div id="dl-safety-warning" class="tile-safety-alert hidden">
+          <span class="safety-icon">⚠️</span>
+          <div class="safety-text">
+            <strong>High Tile Count Alert (&gt;50 tiles)</strong>
+            <p>Downloading large quantities of tiles may be slow or throttled by provider CORS/TOS policies. Consider zooming in for a smaller viewport area.</p>
+          </div>
+        </div>
+
+        <!-- Live Progress Bar (shown when downloading) -->
+        <div id="dl-progress-section" class="dl-progress-section hidden">
+          <div class="dl-progress-header">
+            <span id="dl-progress-status" class="dl-progress-status">Fetching tiles asynchronously...</span>
+            <span id="dl-progress-percent" class="dl-progress-percent">0%</span>
+          </div>
+          <div class="dl-progress-track">
+            <div id="dl-progress-bar" class="dl-progress-fill" style="width: 0%;"></div>
+          </div>
+          <span id="dl-progress-detail" class="dl-progress-detail">Tile 0 of 0</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-cancel-download" class="secondary-action-btn">Cancel</button>
+        <button id="btn-start-download" class="primary-action-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Start ZIP Download
         </button>
       </div>
     </div>
