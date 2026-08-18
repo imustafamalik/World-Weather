@@ -695,121 +695,240 @@ a:hover {
   font-weight: 600;
 }
 
-/* Layer Category Header */
-.layer-category-header {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  padding: 6px 8px 2px;
-  border-top: 1px solid var(--border-subtle);
-  margin-top: 4px;
+/* Layer Menu Accordion System */
+.layer-accordion-item {
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
 }
 
-.layer-category-header:first-of-type {
-  border-top: none;
-  margin-top: 0;
+.layer-accordion-item:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
-.layer-option {
+.layer-accordion-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  text-align: left;
-  transition: all var(--transition-fast);
+  justify-content: space-between;
   width: 100%;
-}
-
-.layer-option:hover {
-  background: var(--bg-card-hover);
+  padding: 8px 6px;
+  background: transparent;
+  border: none;
   color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
 }
 
-.layer-option.active {
-  background: rgba(6, 182, 212, 0.18);
+.layer-accordion-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.accordion-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.accordion-icon {
+  font-size: 13px;
+}
+
+.accordion-arrow {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.layer-accordion-item.open .accordion-arrow {
+  transform: rotate(0deg);
   color: var(--cyan-400);
-  font-weight: 600;
 }
 
-.layer-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-muted);
+.layer-accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 0 6px;
+}
+
+.layer-accordion-content.hidden {
+  display: none;
+}
+
+/* Layer Control Card with Switch & Opacity Slider */
+.layer-control-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.layer-control-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-highlight);
+}
+
+.layer-control-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.layer-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
   flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
 }
 
-.layer-indicator.sat-indicator { background: var(--cyan-400); }
-.layer-indicator.google-indicator { background: #34d399; }
-.layer-indicator.clarity-indicator { background: #60a5fa; }
-.layer-indicator.labels-indicator { background: #a78bfa; }
-.layer-indicator.esa-indicator { background: #10b981; }
-.layer-indicator.landsat-indicator { background: #06b6d4; }
-.layer-indicator.naip-indicator { background: #eab308; }
-.layer-indicator.nasa-indicator { background: var(--amber-400); }
-.layer-indicator.topo-indicator { background: #f472b6; }
-.layer-indicator.dark-indicator { background: #64748b; }
-.layer-indicator.osm-indicator { background: #38bdf8; }
-
-.layer-option.active .layer-indicator {
-  box-shadow: 0 0 8px currentColor;
+.layer-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.layer-info {
+.toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  transition: 0.2s;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.layer-toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+}
+
+.layer-toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(12px);
+}
+
+.layer-control-label {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  overflow: hidden;
   flex: 1;
 }
 
-.layer-text {
-  font-size: 12px;
+.layer-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.layer-control-name {
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
 }
 
-.layer-res-tag {
-  font-size: 10px;
+.layer-control-desc {
+  font-size: 9.5px;
   color: var(--text-muted);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  line-height: 1.3;
 }
 
-.layer-option.active .layer-res-tag {
-  color: var(--cyan-400);
+.layer-status-badge {
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Layer Menu Overlay Section */
-.layer-overlay-section {
-  padding: 6px 8px;
-  border-top: 1px solid var(--border-subtle);
-  margin-top: 4px;
+.layer-status-badge.live {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
-.layer-overlay-toggle {
+.layer-status-badge.thermal {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.layer-status-badge.green {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.layer-status-badge.blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Layer Opacity Slider */
+.layer-slider-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.layer-overlay-toggle input[type="checkbox"] {
-  accent-color: var(--cyan-500);
+.slider-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.layer-opacity-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  outline: none;
+}
+
+.layer-opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cyan-400);
   cursor: pointer;
+  box-shadow: 0 0 4px rgba(6, 182, 212, 0.5);
+}
+
+.slider-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cyan-400);
+  min-width: 26px;
+  text-align: right;
 }
 
 /* Layer Menu Zoom Presets Row */
@@ -851,6 +970,129 @@ a:hover {
 .layer-preset-btn.primary:hover {
   background: var(--cyan-500);
   color: var(--text-inverse);
+}
+
+/* ----------------- GIS Feature Inspector Custom Popup ----------------- */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-panel-solid) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-highlight) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-dropdown) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-panel-solid) !important;
+  border: 1px solid var(--border-highlight) !important;
+}
+
+.gis-feature-popup {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+}
+
+.feature-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.feature-popup-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.feature-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+}
+
+.feature-badge.earthquake-minor { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+.feature-badge.earthquake-moderate { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.feature-badge.earthquake-strong { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+.feature-badge.earthquake-severe { background: rgba(239, 68, 68, 0.25); color: #f87171; }
+.feature-badge.aircraft { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+.feature-badge.fire { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.feature-badge.water { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+.feature-popup-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.feature-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.feature-meta-item.full-width {
+  grid-column: span 2;
+}
+
+.feature-meta-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.feature-meta-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.feature-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--cyan-400);
+  text-decoration: none;
+}
+
+.feature-external-link:hover {
+  text-decoration: underline;
+}
+
+/* Aircraft Rotated Marker Icon */
+.aircraft-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
 .layer-zoom-1m-btn, .layer-download-tiles-btn {
