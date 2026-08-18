@@ -883,11 +883,12 @@
       return;
     }
 
-    const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Surface_Temp_Day/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png';
-    const opacity = state.hazardOpacities.heat || 0.65;
+    // NASA GIBS Surface Air Temperature Day Thermal Anomaly Layer
+    const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/AIRS_L2_Surface_Air_Temperature_Day/default/default/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png';
+    const opacity = state.hazardOpacities.heat || 0.70;
 
     state.hazardLayers.heat = L.tileLayer(heatUrl, {
-      maxNativeZoom: 7,
+      maxNativeZoom: 6,
       maxZoom: 20,
       opacity: opacity,
       zIndex: 615,
@@ -1555,16 +1556,16 @@
       return;
     }
 
-    // High-visibility Global Tree Canopy Density Layer
-    const gfwUrl = 'https://tiles.globalforestwatch.org/tree_cover_loss/v1.9/tcd_30/{z}/{x}/{y}.png';
+    // Global Physical Forest & Vegetation Canopy Overlay
+    const gfwUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}';
     const opacity = state.hazardOpacities.forest || 0.75;
 
     state.hazardLayers.forest = L.tileLayer(gfwUrl, {
-      maxNativeZoom: 12,
+      maxNativeZoom: 8,
       maxZoom: 20,
       opacity: opacity,
       zIndex: 610,
-      attribution: '&copy; Global Forest Watch / Hansen Tree Cover'
+      attribution: '&copy; Esri &mdash; US National Park Service Physical Map'
     }).addTo(state.map);
 
     showToast('Global Forest Canopy Cover layer active.');
