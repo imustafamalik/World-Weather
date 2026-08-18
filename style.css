@@ -812,12 +812,45 @@ a:hover {
   cursor: pointer;
 }
 
-/* Layer Menu Action Buttons */
-.layer-actions-group {
+/* Layer Menu Zoom Presets Row */
+.layer-zoom-presets-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.layer-preset-btn {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
-  margin-top: 4px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 10.5px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.layer-preset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-highlight);
+}
+
+.layer-preset-btn.primary {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25));
+  border-color: var(--cyan-500);
+  color: var(--cyan-400);
+}
+
+.layer-preset-btn.primary:hover {
+  background: var(--cyan-500);
+  color: var(--text-inverse);
 }
 
 .layer-zoom-1m-btn, .layer-download-tiles-btn {
@@ -1199,6 +1232,38 @@ a:hover {
   border-color: rgba(16, 185, 129, 0.4);
 }
 
+/* Detail Capabilities & Features Box */
+.sat-detail-desc-box {
+  padding: 10px 12px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.detail-desc-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.detail-desc-icon {
+  font-size: 13px;
+}
+
+.detail-desc-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cyan-400);
+}
+
+.detail-desc-text {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
 /* GSD Resolution Display Bar */
 .sat-gsd-display {
   background: rgba(0, 0, 0, 0.25);
@@ -1282,21 +1347,22 @@ a:hover {
 
 .sat-actions-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 6px;
 }
 
 .sat-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 8px 6px;
   border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 600;
   transition: all var(--transition-fast);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .sat-action-btn.primary {

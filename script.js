@@ -26,53 +26,39 @@
 
   // Map Tile Layer Providers & Satellite Constellations
   const TILE_LAYERS = {
-    // 1. Commercial High-Resolution Satellite (Sub-Meter)
+    // 1. High-Resolution Commercial Satellite & Aerial (Sub-Meter)
     esri_sat: {
       name: 'Esri World Imagery',
       provider: 'Maxar / DigitalGlobe · 0.3–1 m Optical Multispectral',
       resolution: '0.3–1 m (Sub-Meter)',
+      nativeGSD: '0.3–0.5 m/px',
+      maxNativeZoom: 19,
+      detailTitle: 'Ultra High-Definition Sub-Meter Features:',
+      features: 'Individual vehicles, building roofs, trees, pavement, swimming pools & property lines clearly resolved.',
+      sensorType: 'Optical Multi-Sensor',
+      optimalZoom: 'Zoom 14–19',
+      quality: 'sub-meter',
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       options: {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics, GIS User Community'
-      }
-    },
-    maxar_vivid: {
-      name: 'Maxar Vivid / SecureWatch',
-      provider: 'WorldView-3 / WorldView-4 · 0.3–0.5 m High Precision Optical',
-      resolution: '0.3–0.5 m (Maxar Constellation)',
-      url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 19,
-        attribution: '&copy; Maxar Technologies / Vivid Constellation'
-      }
-    },
-    airbus_pleiades: {
-      name: 'Airbus Pléiades Neo / SPOT',
-      provider: 'Airbus Defence & Space · 0.3–1.5 m High-Cadence Optical',
-      resolution: '0.3–1.5 m (Pléiades Neo)',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 19,
-        attribution: '&copy; Airbus Defence and Space / Spot Image'
-      }
-    },
-    superview_chinaspacewill: {
-      name: 'SuperView / SpaceWill / TripleSat',
-      provider: 'Commercial Constellation · 0.5 m Optical High-Resolution',
-      resolution: '0.5 m (Commercial Constellation)',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 19,
-        attribution: '&copy; SpaceWill / SuperView Earth Observation'
+        maxNativeZoom: 19,
+        maxZoom: 20,
+        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics'
       }
     },
     google_sat: {
       name: 'Google High-Res Satellite',
-      provider: 'GeoEye / Maxar · 0.5–1 m Optical',
+      provider: 'GeoEye / Maxar · 0.5–1 m Optical (Global)',
       resolution: '0.5–1 m (Sub-Meter)',
+      nativeGSD: '0.5–1.0 m/px',
+      maxNativeZoom: 20,
+      detailTitle: 'High-Definition Urban & Rural Detail:',
+      features: 'City streets, buildings, stadiums, highways, coastlines and neighborhood infrastructure.',
+      sensorType: 'Optical Global',
+      optimalZoom: 'Zoom 14–20',
+      quality: 'sub-meter',
       url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
       options: {
+        maxNativeZoom: 20,
         maxZoom: 20,
         attribution: '&copy; Google'
       }
@@ -81,72 +67,127 @@
       name: 'Google Hybrid Satellite',
       provider: 'Google Satellite + Reference Labels & Highways',
       resolution: '0.5–1 m (Sub-Meter)',
+      nativeGSD: '0.5–1.0 m/px',
+      maxNativeZoom: 20,
+      detailTitle: 'Hybrid Satellite with Street & Place Names:',
+      features: 'High-res satellite background with road names, highways, place labels & administrative borders.',
+      sensorType: 'Optical + Vector Labels',
+      optimalZoom: 'Zoom 11–20',
+      quality: 'sub-meter',
       url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
       options: {
+        maxNativeZoom: 20,
         maxZoom: 20,
         attribution: '&copy; Google'
       }
     },
     esri_clarity: {
-      name: 'Esri Clarity (Cloudless)',
-      provider: 'Esri Archival High-Resolution Clear Imagery',
+      name: 'Esri Clarity (Cloudless Archival)',
+      provider: 'Esri Archival Clear Imagery · Cloud-Free Composite',
       resolution: '0.5–1 m (Archival Clear)',
+      nativeGSD: '0.5–1.0 m/px',
+      maxNativeZoom: 19,
+      detailTitle: 'Cloud-Free Archival Visual Clarity:',
+      features: '100% cloud-free composite imagery with high contrast, ideal for terrain and landscape observation.',
+      sensorType: 'Optical Archival',
+      optimalZoom: 'Zoom 12–19',
+      quality: 'sub-meter',
       url: 'https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       options: {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri Clarity &mdash; Maxar, Earthstar'
+        maxNativeZoom: 19,
+        maxZoom: 20,
+        attribution: 'Tiles &copy; Esri Clarity &mdash; Maxar'
       }
     },
-    esri_labels: {
-      name: 'Esri Satellite + Labels',
-      provider: 'Esri World Imagery + Boundary & Place Reference',
-      resolution: '0.3–1 m (Hybrid Reference)',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    usgs_imagery: {
+      name: 'USGS National Map Aerial',
+      provider: 'USGS National Map · 0.3–1 m US Orthoimagery',
+      resolution: '0.3–1 m (US Ortho)',
+      nativeGSD: '0.3–1.0 m/px',
+      maxNativeZoom: 18,
+      detailTitle: 'US Geological Survey Orthoimagery:',
+      features: 'Survey-grade aerial orthoimagery covering the United States with high geometric fidelity.',
+      sensorType: 'Airborne Ortho',
+      optimalZoom: 'Zoom 11–18',
+      quality: 'sub-meter',
+      url: 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}',
       options: {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar'
-      },
-      hasLabels: true
-    },
-
-    // 2. Open & Government Medium/High-Res Earth Observation
-    esa_sentinel2: {
-      name: 'ESA Sentinel-2 Cloudless',
-      provider: 'Copernicus Sentinel-2 · 10 m Multispectral MSI',
-      resolution: '10 m (Multispectral)',
-      url: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
-      options: {
-        maxZoom: 16,
-        attribution: 'Sentinel-2 cloudless by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data)'
-      }
-    },
-    usgs_landsat: {
-      name: 'NASA / USGS Landsat 8 & 9',
-      provider: 'USGS / NASA Landsat OLI/TIRS · 15–30 m Analysis Ready',
-      resolution: '15–30 m (Multispectral)',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 19,
-        attribution: 'USGS / NASA Landsat &mdash; Earth Resources Observation'
+        maxNativeZoom: 18,
+        maxZoom: 20,
+        attribution: 'USGS National Map &mdash; Earth Resources'
       }
     },
     usda_naip: {
       name: 'USDA NAIP Aerial (US Only)',
-      provider: 'USDA Farm Production · 0.6–1 m High-Res Orthoimagery',
+      provider: 'USDA Farm Production · 0.6–1 m Agricultural Ortho',
       resolution: '0.6–1 m (US Aerial Ortho)',
+      nativeGSD: '0.6–1.0 m/px',
+      maxNativeZoom: 18,
+      detailTitle: 'Agricultural & Rural Land Use Detail:',
+      features: 'Crop parcel boundaries, field patterns, farm structures, rural roads and vegetation cover.',
+      sensorType: 'Airborne Agricultural',
+      optimalZoom: 'Zoom 11–18',
+      quality: 'high',
       url: 'https://gis.apfo.usda.gov/arcgis/rest/services/NAIP/USDA_CONUS_PRIME/ImageServer/tile/{z}/{y}/{x}',
       options: {
-        maxZoom: 18,
+        maxNativeZoom: 18,
+        maxZoom: 20,
         attribution: '&copy; USDA Aerial Photography Field Office (NAIP)'
+      }
+    },
+
+    // 2. Open & Government Earth Observation
+    esa_sentinel2: {
+      name: 'ESA Sentinel-2 Cloudless',
+      provider: 'Copernicus Sentinel-2 · 10 m Multispectral MSI (EOX)',
+      resolution: '10 m (Multispectral)',
+      nativeGSD: '10 m/px',
+      maxNativeZoom: 16,
+      detailTitle: 'Copernicus 10-Meter Multispectral Composite:',
+      features: 'Forest canopies, agricultural crop fields, large lakes, rivers, snowfields and regional land use.',
+      sensorType: 'Multispectral MSI',
+      optimalZoom: 'Zoom 8–16',
+      quality: 'medium',
+      url: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+      options: {
+        maxNativeZoom: 16,
+        maxZoom: 20,
+        attribution: 'Sentinel-2 cloudless by <a href="https://eox.at/">EOX IT Services GmbH</a>'
+      }
+    },
+    nasa_modis: {
+      name: 'NASA MODIS Terra TrueColor',
+      provider: 'NASA GIBS · 250 m Daily Reflectance Earth Observation',
+      resolution: '250 m (Daily Reflectance)',
+      nativeGSD: '250 m/px',
+      maxNativeZoom: 9,
+      detailTitle: 'Global Daily Atmospheric & Surface View:',
+      features: 'Continental cloud systems, wildfire smoke, dust storms, seasonal snow cover and ocean currents.',
+      sensorType: 'Optical Planetary',
+      optimalZoom: 'Zoom 3–9',
+      quality: 'macro',
+      url: 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_TrueColor/default/2023-08-01/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg',
+      options: {
+        maxNativeZoom: 9,
+        maxZoom: 20,
+        attribution: 'Imagery &copy; NASA Earthdata / GIBS MODIS'
       }
     },
     nasa_night: {
       name: 'NASA Earth at Night',
-      provider: 'NASA Suomi NPP / VIIRS Day-Night Band (City Lights)',
+      provider: 'NASA Suomi NPP / VIIRS Day-Night Band (750 m)',
       resolution: '750 m (Global VIIRS)',
+      nativeGSD: '750 m/px',
+      maxNativeZoom: 8,
+      detailTitle: 'Global Nighttime City Lights & Illumination:',
+      features: 'Metropolitan centers, highway corridors, human settlements, gas flares and offshore fishing fleets.',
+      sensorType: 'Infrared Day/Night Band',
+      optimalZoom: 'Zoom 2–8',
+      quality: 'macro',
       url: 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg',
       options: {
-        maxZoom: 8,
+        maxNativeZoom: 8,
+        maxZoom: 20,
         attribution: 'Imagery &copy; NASA Earthdata / GIBS VIIRS'
       }
     },
@@ -154,54 +195,94 @@
       name: 'OpenTopoMap',
       provider: 'SRTM Elevation + OpenStreetMap Contours & Relief',
       resolution: 'Vector / 10–20 m Topographic',
+      nativeGSD: '10–20 m Topographic',
+      maxNativeZoom: 17,
+      detailTitle: 'Topographic Elevation & Mountain Contours:',
+      features: 'Elevation contour lines, mountain peaks, ridgelines, forest shading, hiking paths and waterways.',
+      sensorType: 'SRTM Topographic Vector',
+      optimalZoom: 'Zoom 7–17',
+      quality: 'medium',
       url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
       options: {
-        maxZoom: 17,
-        attribution: 'Map data &copy; <a href="https://openstreetmap.org">OSM</a>, SRTM | Style &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+        maxNativeZoom: 17,
+        maxZoom: 20,
+        attribution: 'Map data &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
       }
     },
 
     // 3. Vector Street Maps
     voyager: {
       name: 'Standard Voyager',
-      provider: 'CARTO + OpenStreetMap Vector',
+      provider: 'CARTO + OpenStreetMap Detailed Cartography',
       resolution: 'Vector Street Map',
+      nativeGSD: 'Vector Street Detail',
+      maxNativeZoom: 19,
+      detailTitle: 'Complete Street & Terrain Cartography:',
+      features: 'Streets, road numbers, transit lines, building footprints, parks, points of interest and labels.',
+      sensorType: 'Vector Cartography',
+      optimalZoom: 'Zoom 2–19',
+      quality: 'high',
       url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       options: {
-        maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 20,
         subdomains: 'abcd',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
       }
     },
     dark: {
       name: 'Dark Night Mode',
       provider: 'CARTO Dark Matter + OpenStreetMap',
       resolution: 'Vector Dark Theme',
+      nativeGSD: 'Vector Cartography',
+      maxNativeZoom: 19,
+      detailTitle: 'High-Contrast Dark Theme Cartography:',
+      features: 'Sleek dark basemap ideal for evening viewing, radar visualization and high-contrast weather overlays.',
+      sensorType: 'Vector Dark Theme',
+      optimalZoom: 'Zoom 2–19',
+      quality: 'high',
       url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
       options: {
-        maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 20,
         subdomains: 'abcd',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
       }
     },
     osm: {
       name: 'OpenStreetMap Standard',
       provider: 'OpenStreetMap Global Community Contributors',
       resolution: 'Vector Standard OSM',
+      nativeGSD: 'Vector Cartography',
+      maxNativeZoom: 19,
+      detailTitle: 'Community OpenStreetMap Vector Detail:',
+      features: 'Global street network, address numbers, footpaths, amenities and local geographic points of interest.',
+      sensorType: 'Vector Community',
+      optimalZoom: 'Zoom 2–19',
+      quality: 'high',
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       options: {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        maxNativeZoom: 19,
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors'
       }
     },
     // Backwards compatibility alias
     satellite: {
       name: 'Esri World Imagery',
-      provider: 'Maxar / DigitalGlobe · Optical Multispectral',
+      provider: 'Maxar / DigitalGlobe · 0.3–1 m Optical Multispectral',
       resolution: '0.3–1 m (Sub-Meter)',
+      nativeGSD: '0.3–0.5 m/px',
+      maxNativeZoom: 19,
+      detailTitle: 'Ultra High-Definition Sub-Meter Features:',
+      features: 'Individual vehicles, building roofs, trees, pavement, swimming pools & property lines clearly resolved.',
+      sensorType: 'Optical Multi-Sensor',
+      optimalZoom: 'Zoom 14–19',
+      quality: 'sub-meter',
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       options: {
-        maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 20,
         attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics'
       }
     }
@@ -390,8 +471,9 @@
   }
 
   function initMap() {
-    const initialCoords = [20, 0];
-    const initialZoom = 2;
+    // Standard standard location & zoom where all layers load without blackout
+    const initialCoords = [33.6844, 73.0479];
+    const initialZoom = 11;
 
     state.map = L.map('map', {
       center: initialCoords,
@@ -402,9 +484,9 @@
       worldCopyJump: true
     });
 
-    // Set initial map layer
+    // Set initial map layer (defaults to Esri high-res satellite or user setting)
     const initialLayer = state.settings.mapLayer && TILE_LAYERS[state.settings.mapLayer] ? 
-      state.settings.mapLayer : 'voyager';
+      state.settings.mapLayer : 'esri_sat';
     setMapLayer(initialLayer);
 
     // Map Click Handler
@@ -454,7 +536,7 @@
           saveSettings();
           applySettingsToUI();
           layerMenu?.classList.add('hidden');
-          showToast(`Switched map layer: ${TILE_LAYERS[layerKey].name}`);
+          showToast(`Layer Active: ${TILE_LAYERS[layerKey].name} (${TILE_LAYERS[layerKey].resolution})`);
         }
       });
     });
@@ -465,7 +547,15 @@
       toggleOverlayLabels(e.target.checked);
     });
 
-    // Quick Zoom to 1-Meter Detail Button (in layer menu & in info panel)
+    // Quick Zoom Presets: Standard Safe View (Z11 - zero blackout) and 1m Detail (Z18)
+    document.getElementById('btn-zoom-standard')?.addEventListener('click', () => {
+      layerMenu?.classList.add('hidden');
+      zoomToStandard();
+    });
+    document.getElementById('btn-zoom-to-safe')?.addEventListener('click', () => {
+      zoomToStandard();
+    });
+
     document.getElementById('btn-zoom-1m')?.addEventListener('click', () => {
       layerMenu?.classList.add('hidden');
       zoomTo1Meter();
@@ -498,12 +588,18 @@
   }
 
   function setMapLayer(layerKey) {
-    const config = TILE_LAYERS[layerKey] || TILE_LAYERS.voyager;
+    const config = TILE_LAYERS[layerKey] || TILE_LAYERS.esri_sat;
     if (state.activeTileLayer) {
       state.map.removeLayer(state.activeTileLayer);
     }
     
-    state.activeTileLayer = L.tileLayer(config.url, config.options).addTo(state.map);
+    // Ensure maxNativeZoom is set so Leaflet never renders black tiles when zoomed in
+    const layerOptions = Object.assign({}, config.options, {
+      maxNativeZoom: config.maxNativeZoom || 19,
+      maxZoom: 20
+    });
+
+    state.activeTileLayer = L.tileLayer(config.url, layerOptions).addTo(state.map);
     state.settings.mapLayer = layerKey;
 
     // If layer specifically has built-in labels or user enabled overlay, ensure overlay state
@@ -520,7 +616,7 @@
       }
     });
 
-    // Update Satellite Intelligence Card
+    // Update Satellite Intelligence Card with detailed capabilities
     updateSatelliteIntelligenceUI(layerKey);
     updateLiveGSDDisplay();
   }
@@ -531,7 +627,8 @@
     if (state.showOverlayLabels) {
       if (!state.overlayTileLayer && state.map) {
         state.overlayTileLayer = L.tileLayer(OVERLAY_TILE_URL, {
-          maxZoom: 19,
+          maxNativeZoom: 19,
+          maxZoom: 20,
           zIndex: 650,
           opacity: 0.9
         }).addTo(state.map);
@@ -567,6 +664,7 @@
     const zoom = state.map.getZoom();
     const bounds = state.map.getBounds();
     const gsd = calculateGSD(center.lat, zoom);
+    const layer = TILE_LAYERS[state.settings.mapLayer] || TILE_LAYERS.esri_sat;
     
     // Scale calculation (assuming standard 96 DPI screen: 1 pixel = 0.000264583 meters)
     const scaleRatio = Math.round(gsd / 0.000264583);
@@ -627,7 +725,7 @@
     // 3. Update Satellite Intelligence Card in info panel
     const satGsdValEl = document.getElementById('sat-gsd-value');
     if (satGsdValEl) {
-      satGsdValEl.textContent = `${gsdFormatted} / pixel (${(gsd < 1 ? 'Sub-Meter' : gsd <= 5 ? 'High Resolution' : gsd <= 30 ? 'Medium Res' : 'Regional')})`;
+      satGsdValEl.textContent = `${gsdFormatted} (Native: ${layer.nativeGSD || '0.3m'})`;
     }
 
     const satGsdBar = document.getElementById('sat-gsd-bar');
@@ -638,7 +736,7 @@
 
     const satChipZoom = document.getElementById('sat-chip-zoom');
     if (satChipZoom) {
-      satChipZoom.textContent = `Zoom ${zoom}`;
+      satChipZoom.textContent = `Current: Z${zoom} (${zoom <= (layer.maxNativeZoom || 19) ? 'Clear' : 'Interpolated'})`;
     }
 
     const gsdBadge = document.getElementById('sat-gsd-badge');
@@ -656,11 +754,20 @@
     }
   }
 
+  function zoomToStandard() {
+    if (!state.map) return;
+    const center = state.map.getCenter();
+    state.map.flyTo(center, 11, {
+      duration: state.settings.animations ? 0.9 : 0
+    });
+    showToast('Switched to Standard Overview (Zoom 11 - Crisp view across all layers).');
+  }
+
   function zoomTo1Meter() {
     if (!state.map) return;
     const currentLayer = state.settings.mapLayer;
-    // If on vector map, switch to sub-meter satellite
-    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('hybrid') && !currentLayer.includes('vivid') && !currentLayer.includes('pleiades')) {
+    // If currently on macro/vector layer, switch to true sub-meter satellite
+    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('imagery') && !currentLayer.includes('naip')) {
       setMapLayer('esri_sat');
     }
     const center = state.map.getCenter();
@@ -673,7 +780,7 @@
     state.map.flyTo(center, targetZoom, {
       duration: state.settings.animations ? 1.2 : 0
     });
-    showToast(`Zoomed to 1-meter detail (Zoom ${targetZoom}).`);
+    showToast(`Zoomed to 1-meter sub-meter detail (Zoom ${targetZoom}).`);
   }
 
   function updateSatelliteIntelligenceUI(layerKey) {
@@ -682,26 +789,20 @@
     const sensorNameEl = document.getElementById('sat-sensor-name');
     const sensorProviderEl = document.getElementById('sat-sensor-provider');
     const categoryTagEl = document.getElementById('sat-resolution-category');
+    const detailTitleEl = document.getElementById('sat-detail-title');
+    const detailFeaturesEl = document.getElementById('sat-detail-features');
+    const chipTypeEl = document.getElementById('sat-chip-type');
+    const chipNativeEl = document.getElementById('sat-chip-native');
+    const chipZoomEl = document.getElementById('sat-chip-zoom');
 
     if (sensorNameEl) sensorNameEl.textContent = layer.name;
     if (sensorProviderEl) sensorProviderEl.textContent = layer.provider;
-    if (categoryTagEl) {
-      if (layerKey?.includes('sat') || layerKey?.includes('clarity') || layerKey?.includes('hybrid') || layerKey?.includes('vivid') || layerKey?.includes('pleiades') || layerKey?.includes('superview')) {
-        categoryTagEl.textContent = 'Sub-Meter (≤ 1m)';
-      } else if (layerKey === 'esa_sentinel2') {
-        categoryTagEl.textContent = 'Copernicus 10m';
-      } else if (layerKey === 'usgs_landsat') {
-        categoryTagEl.textContent = 'Landsat 15-30m';
-      } else if (layerKey === 'usda_naip') {
-        categoryTagEl.textContent = 'NAIP Aerial 0.6-1m';
-      } else if (layerKey === 'nasa_night') {
-        categoryTagEl.textContent = 'Night VIIRS (750m)';
-      } else if (layerKey === 'opentopo') {
-        categoryTagEl.textContent = 'Topographic (10m)';
-      } else {
-        categoryTagEl.textContent = 'Vector Cartography';
-      }
-    }
+    if (categoryTagEl) categoryTagEl.textContent = layer.resolution || 'Sub-Meter';
+    if (detailTitleEl) detailTitleEl.textContent = layer.detailTitle || 'Resolvable Map Features:';
+    if (detailFeaturesEl) detailFeaturesEl.textContent = layer.features || 'Detailed imagery available for this provider.';
+    if (chipTypeEl) chipTypeEl.textContent = layer.sensorType || 'Optical';
+    if (chipNativeEl) chipNativeEl.textContent = `Native: ${layer.nativeGSD || '0.3m/px'}`;
+    if (chipZoomEl) chipZoomEl.textContent = `Optimal: ${layer.optimalZoom || 'Zoom 11–19'}`;
   }
 
   // -------------------------------------------------------------------

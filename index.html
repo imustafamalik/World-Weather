@@ -162,37 +162,13 @@
         </div>
 
         <!-- Category 1: Commercial High-Resolution Satellite (Sub-Meter) -->
-        <div class="layer-category-header">🛰️ Commercial High-Res Satellite (≤ 1 m)</div>
+        <div class="layer-category-header">🛰️ High-Resolution Satellite &amp; Aerial (≤ 1 m)</div>
 
         <button class="layer-option active" data-layer="esri_sat" role="menuitem">
           <span class="layer-indicator sat-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Esri World Imagery</span>
-            <span class="layer-res-tag">Maxar / DigitalGlobe · 0.3–1 m</span>
-          </span>
-        </button>
-
-        <button class="layer-option" data-layer="maxar_vivid" role="menuitem">
-          <span class="layer-indicator sat-indicator"></span>
-          <span class="layer-info">
-            <span class="layer-text">Maxar Vivid / SecureWatch</span>
-            <span class="layer-res-tag">WorldView-3/4 · 0.3–0.5 m High Precision</span>
-          </span>
-        </button>
-
-        <button class="layer-option" data-layer="airbus_pleiades" role="menuitem">
-          <span class="layer-indicator sat-indicator"></span>
-          <span class="layer-info">
-            <span class="layer-text">Airbus Pléiades Neo / SPOT</span>
-            <span class="layer-res-tag">Airbus Defence · 0.3–1.5 m Optical</span>
-          </span>
-        </button>
-
-        <button class="layer-option" data-layer="superview_chinaspacewill" role="menuitem">
-          <span class="layer-indicator sat-indicator"></span>
-          <span class="layer-info">
-            <span class="layer-text">SuperView / SpaceWill / TripleSat</span>
-            <span class="layer-res-tag">Commercial Constellation · 0.5 m</span>
+            <span class="layer-res-tag">Maxar · 0.3–1 m (Global)</span>
           </span>
         </button>
 
@@ -200,7 +176,7 @@
           <span class="layer-indicator google-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Google High-Res Satellite</span>
-            <span class="layer-res-tag">GeoEye / Maxar · 0.5–1 m</span>
+            <span class="layer-res-tag">GeoEye / Maxar · 0.5–1 m (Global)</span>
           </span>
         </button>
 
@@ -208,28 +184,36 @@
           <span class="layer-indicator google-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">Google Hybrid</span>
-            <span class="layer-res-tag">Satellite + Reference Labels</span>
+            <span class="layer-res-tag">Satellite + Roads &amp; Labels</span>
           </span>
         </button>
 
         <button class="layer-option" data-layer="esri_clarity" role="menuitem">
           <span class="layer-indicator clarity-indicator"></span>
           <span class="layer-info">
-            <span class="layer-text">Esri Clarity (Cloudless)</span>
-            <span class="layer-res-tag">Archival Clear Imagery · sub-meter</span>
+            <span class="layer-text">Esri Clarity (Cloudless Archival)</span>
+            <span class="layer-res-tag">Clear Composite · Sub-Meter</span>
           </span>
         </button>
 
-        <button class="layer-option" data-layer="esri_labels" role="menuitem">
-          <span class="layer-indicator labels-indicator"></span>
+        <button class="layer-option" data-layer="usgs_imagery" role="menuitem">
+          <span class="layer-indicator landsat-indicator"></span>
           <span class="layer-info">
-            <span class="layer-text">Esri Satellite + Labels</span>
-            <span class="layer-res-tag">Hybrid Administrative Reference</span>
+            <span class="layer-text">USGS National Map Aerial</span>
+            <span class="layer-res-tag">USGS Ortho · 0.3–1 m High-Res</span>
           </span>
         </button>
 
-        <!-- Category 2: Open & Government Medium/High-Res -->
-        <div class="layer-category-header">🌍 Open &amp; Government Earth Observation</div>
+        <button class="layer-option" data-layer="usda_naip" role="menuitem">
+          <span class="layer-indicator naip-indicator"></span>
+          <span class="layer-info">
+            <span class="layer-text">USDA NAIP Aerial</span>
+            <span class="layer-res-tag">Agricultural Ortho · 0.6–1 m</span>
+          </span>
+        </button>
+
+        <!-- Category 2: Open & Government Earth Observation -->
+        <div class="layer-category-header">🌍 Earth Observation &amp; Topographic</div>
 
         <button class="layer-option" data-layer="esa_sentinel2" role="menuitem">
           <span class="layer-indicator esa-indicator"></span>
@@ -239,19 +223,11 @@
           </span>
         </button>
 
-        <button class="layer-option" data-layer="usgs_landsat" role="menuitem">
-          <span class="layer-indicator landsat-indicator"></span>
+        <button class="layer-option" data-layer="nasa_modis" role="menuitem">
+          <span class="layer-indicator nasa-indicator"></span>
           <span class="layer-info">
-            <span class="layer-text">NASA / USGS Landsat 8 &amp; 9</span>
-            <span class="layer-res-tag">Analysis Ready · 15–30 m Multispectral</span>
-          </span>
-        </button>
-
-        <button class="layer-option" data-layer="usda_naip" role="menuitem">
-          <span class="layer-indicator naip-indicator"></span>
-          <span class="layer-info">
-            <span class="layer-text">USDA NAIP Aerial (US Only)</span>
-            <span class="layer-res-tag">High-Res Orthoimagery · 0.6–1 m</span>
+            <span class="layer-text">NASA MODIS Terra TrueColor</span>
+            <span class="layer-res-tag">NASA GIBS · 250 m Daily Reflectance</span>
           </span>
         </button>
 
@@ -267,7 +243,7 @@
           <span class="layer-indicator topo-indicator"></span>
           <span class="layer-info">
             <span class="layer-text">OpenTopoMap</span>
-            <span class="layer-res-tag">SRTM Topographic Contours</span>
+            <span class="layer-res-tag">SRTM Topographic Relief &amp; Contours</span>
           </span>
         </button>
 
@@ -306,12 +282,18 @@
           </label>
         </div>
 
-        <!-- Quick Action Buttons: Zoom 1m & Tile Downloader -->
-        <div class="layer-actions-group">
-          <button id="btn-zoom-1m" class="layer-zoom-1m-btn">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            Zoom to 1-Meter Detail
+        <!-- Quick Zoom Level Presets (No Blackout standard view + 1m HD) -->
+        <div class="layer-zoom-presets-row">
+          <button id="btn-zoom-standard" class="layer-preset-btn" title="Set standard safe zoom (No blackout for any layer)">
+            <span>🏙️ Standard View (Z11)</span>
           </button>
+          <button id="btn-zoom-1m" class="layer-preset-btn primary" title="Zoom to 1-meter sub-meter detail">
+            <span>🔍 1m Detail (Z18)</span>
+          </button>
+        </div>
+
+        <!-- Action: Tile Downloader -->
+        <div class="layer-actions-group">
           <button id="btn-download-tiles" class="layer-download-tiles-btn" title="Download visible map tiles as a ZIP archive">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download Visible Tiles (ZIP)
@@ -766,7 +748,7 @@
         </div>
       </section>
 
-      <!-- Section 8: Satellite Intelligence Card -->
+      <!-- Section 8: Satellite Intelligence & Map Detail Capability Card -->
       <section class="card satellite-intel-card" id="satellite-intel-card">
         <div class="card-section-title">
           <div class="title-with-icon">
@@ -775,55 +757,66 @@
               <path d="M12 2L12 5M12 19L12 22M2 12L5 12M19 12L22 12"/>
               <path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
             </svg>
-            <h3>Satellite Imagery</h3>
+            <h3>Satellite &amp; Map Detail</h3>
           </div>
-          <span class="section-tag" id="sat-resolution-category">High-Res</span>
+          <span class="section-tag" id="sat-resolution-category">Sub-Meter (≤ 1m)</span>
         </div>
 
-        <!-- Active Sensor & Resolution -->
+        <!-- Active Sensor & Detail Rating -->
         <div class="sat-sensor-row">
           <div class="sat-sensor-info">
             <div class="sat-sensor-name" id="sat-sensor-name">Esri World Imagery</div>
-            <div class="sat-sensor-provider" id="sat-sensor-provider">Maxar / DigitalGlobe · Optical Multispectral</div>
+            <div class="sat-sensor-provider" id="sat-sensor-provider">Maxar / DigitalGlobe · 0.3–1 m Optical Multispectral</div>
           </div>
           <div class="sat-badge-group">
             <span class="sat-badge sub-meter" id="sat-gsd-badge">Sub-Meter GSD</span>
           </div>
         </div>
 
-        <!-- Live GSD Resolution Meter -->
+        <!-- Detail Capabilities & Resolved Features Description -->
+        <div class="sat-detail-desc-box" id="sat-detail-desc-box">
+          <div class="detail-desc-header">
+            <span class="detail-desc-icon">🎯</span>
+            <strong class="detail-desc-title" id="sat-detail-title">Resolvable Map Features:</strong>
+          </div>
+          <p class="detail-desc-text" id="sat-detail-features">Individual vehicles, building roofs, trees, roads, and backyard features clearly identifiable.</p>
+        </div>
+
+        <!-- Live GSD vs Sensor Native Resolution Comparison -->
         <div class="sat-gsd-display" id="sat-gsd-panel">
           <div class="gsd-label-row">
-            <span class="gsd-label">⚡ Live Ground Resolution</span>
+            <span class="gsd-label">⚡ Live Screen Ground Resolution</span>
             <span class="gsd-value" id="sat-gsd-value">-- m/pixel</span>
           </div>
           <div class="gsd-bar-track">
-            <div class="gsd-bar-fill" id="sat-gsd-bar" style="width: 50%;"></div>
+            <div class="gsd-bar-fill" id="sat-gsd-bar" style="width: 75%;"></div>
           </div>
           <div class="gsd-scale-labels">
             <span>0.3 m (Ultra)</span>
-            <span>1 m</span>
-            <span>10 m</span>
-            <span>100 m+</span>
+            <span>1 m (High)</span>
+            <span>10 m (Medium)</span>
+            <span>250 m+ (Macro)</span>
           </div>
         </div>
 
-        <!-- Satellite Capability Chips -->
+        <!-- Satellite Capability Chips & Zoom Health -->
         <div class="sat-capability-chips" id="sat-capability-chips">
-          <span class="sat-chip optical">Optical</span>
-          <span class="sat-chip multispectral">Multispectral</span>
-          <span class="sat-chip" id="sat-chip-zoom">Zoom 10</span>
+          <span class="sat-chip optical" id="sat-chip-type">Optical High-Res</span>
+          <span class="sat-chip multispectral" id="sat-chip-native">Native: 0.3m/px</span>
+          <span class="sat-chip" id="sat-chip-zoom">Zoom 11 (Safe)</span>
         </div>
 
-        <!-- Action Buttons Row -->
+        <!-- Action Buttons Row: Standard Zero-Blackout View, 1m HD Zoom, and Overlay -->
         <div class="sat-actions-row">
+          <button class="sat-action-btn secondary" id="btn-zoom-to-safe" title="Jump to standard overview (No blackout guaranteed)">
+            🏙️ Standard (Z11)
+          </button>
           <button class="sat-action-btn primary" id="btn-zoom-to-1m" title="Zoom to sub-meter 1m resolution">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            Zoom to 1m Detail
+            1m Detail (Z18)
           </button>
           <button class="sat-action-btn secondary" id="btn-toggle-sat-overlay" title="Toggle place name labels overlay">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l10.7 10.7"/><path d="M22.2 6L12 16.7"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
-            Labels Off
+            🏷️ Labels
           </button>
         </div>
       </section>
