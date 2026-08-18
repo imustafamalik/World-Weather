@@ -106,117 +106,133 @@
     </div>
   </header>
 
-  <!-- Floating Custom Map Controls -->
-  <div class="map-floating-controls">
-    <div class="control-group">
-      <button id="ctrl-zoom-in" class="map-ctrl-btn" title="Zoom In" aria-label="Zoom In">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      </button>
-      <button id="ctrl-zoom-out" class="map-ctrl-btn" title="Zoom Out" aria-label="Zoom Out">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      </button>
-    </div>
+  <!-- Main Two-Part Split Layout Container -->
+  <div class="app-split-container">
+    <!-- Left Part: Permanent GIS Layer Manager & Live Legend Sidebar -->
+    <aside id="gis-sidebar" class="gis-sidebar" aria-label="GIS Layer Manager and Map Legends">
+      <!-- Sidebar Title Header -->
+      <div class="gis-sidebar-header">
+        <div class="sidebar-title-wrap">
+          <span class="sidebar-header-icon">🗺️</span>
+          <span class="sidebar-header-title">Layers &amp; Map Legend</span>
+        </div>
+        <span class="sidebar-live-pill">LIVE FEED</span>
+      </div>
 
-    <div class="control-group">
-      <button id="ctrl-reset-view" class="map-ctrl-btn" title="Reset World View" aria-label="Reset to World View">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M2 12h20"></path>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-        </svg>
-      </button>
-      <button id="ctrl-precision" class="map-ctrl-btn" title="Toggle Precision Crosshair Mode" aria-label="Toggle Precision Mode">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="2" x2="12" y2="6"></line>
-          <line x1="12" y1="18" x2="12" y2="22"></line>
-          <line x1="2" y1="12" x2="6" y2="12"></line>
-          <line x1="18" y1="12" x2="22" y2="12"></line>
-        </svg>
-      </button>
-    </div>
+      <!-- Live GSD Resolution & Scale Telemetry Header -->
+      <div class="layer-menu-resolution-bar">
+        <div class="res-bar-top">
+          <span class="res-bar-icon">🛰️</span>
+          <span class="res-bar-label">Ground Resolution:</span>
+          <span id="live-gsd-display" class="res-bar-value">-- m/px</span>
+        </div>
+        <div class="res-bar-telemetry">
+          <span class="res-telemetry-tag" id="live-scale-tag">Scale 1:--</span>
+          <span class="res-telemetry-tag" id="live-area-tag">Area -- km²</span>
+        </div>
+      </div>
 
-    <!-- Map Layer Switcher Floating Pill -->
-    <div class="control-group layer-group">
-      <button id="ctrl-layer-toggle" class="map-ctrl-btn satellite-btn" title="Change Map Style / Satellite Imagery" aria-label="Change Map Style">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 2L12 5M12 19L12 22M2 12L5 12M19 12L22 12"/>
-          <path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
-        </svg>
-        <span class="sat-btn-label">Layers</span>
-      </button>
-
-      <!-- Fixed Side GIS Multi-Source Layer Manager -->
-      <div id="layer-menu" class="layer-menu hidden" role="menu" aria-label="GIS Layer Manager">
-        <!-- Panel Header with Title & Close Button -->
-        <div class="layer-menu-top-header">
-          <div class="layer-menu-title-wrap">
-            <span class="layer-menu-header-icon">🗺️</span>
-            <span class="layer-menu-header-title">GIS Layer Manager</span>
+      <!-- Weather Pinpoint Click Interaction Mode Toggle -->
+      <div class="layer-mode-toggle-card">
+        <div class="mode-toggle-left">
+          <span class="mode-icon">🌦️</span>
+          <div class="mode-text-wrap">
+            <span class="mode-title">Weather Click Mode</span>
+            <span class="mode-desc">Click map to load forecast &amp; elevation</span>
           </div>
-          <button id="btn-close-layer-menu" class="layer-menu-close-btn" type="button" title="Close Layer Panel" aria-label="Close Layer Panel">
-            ✕
+        </div>
+        <label class="layer-toggle-switch" for="toggle-weather-click-mode">
+          <input type="checkbox" id="toggle-weather-click-mode" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Dedicated Scrollable Container for Legends and Layer Categories -->
+      <div class="gis-sidebar-scrollable-body">
+        <!-- Section 0: Interactive Map Layers Legend & Visual Keys -->
+        <div class="layer-accordion-item open" data-accordion="legends">
+          <button class="layer-accordion-header" type="button">
+            <div class="accordion-title-wrap">
+              <span class="accordion-icon">📊</span>
+              <span class="accordion-title">Map Layers Legend &amp; Keys</span>
+            </div>
+            <span class="accordion-arrow">▼</span>
           </button>
-        </div>
+          <div class="layer-accordion-content">
+            <!-- Earthquakes Legend Card -->
+            <div class="legend-card">
+              <div class="legend-card-title">🌋 USGS Earthquakes (Magnitude)</div>
+              <div class="legend-scale-dots">
+                <span class="legend-scale-item"><span class="legend-dot" style="background:#22c55e;"></span> &lt; M2.5</span>
+                <span class="legend-scale-item"><span class="legend-dot" style="background:#f59e0b;"></span> M2.5–4.4</span>
+                <span class="legend-scale-item"><span class="legend-dot" style="background:#f97316;"></span> M4.5–5.9</span>
+                <span class="legend-scale-item"><span class="legend-dot" style="background:#ef4444;"></span> M6.0+</span>
+              </div>
+            </div>
 
-        <!-- Live GSD Resolution & Scale Telemetry Header -->
-        <div class="layer-menu-resolution-bar">
-          <div class="res-bar-top">
-            <span class="res-bar-icon">🛰️</span>
-            <span class="res-bar-label">Ground Resolution:</span>
-            <span id="live-gsd-display" class="res-bar-value">-- m/px</span>
-          </div>
-          <div class="res-bar-telemetry">
-            <span class="res-telemetry-tag" id="live-scale-tag">Scale 1:--</span>
-            <span class="res-telemetry-tag" id="live-area-tag">Area -- km²</span>
-          </div>
-        </div>
+            <!-- Doppler Rain Radar Legend Card -->
+            <div class="legend-card">
+              <div class="legend-card-title">🌧️ Doppler Rain &amp; Storm Radar (dBZ)</div>
+              <div class="legend-radar-gradient"></div>
+              <div class="legend-scale-labels">
+                <span>Light (15)</span>
+                <span>Mod (35)</span>
+                <span>Heavy (50)</span>
+                <span>Extreme (65+)</span>
+              </div>
+            </div>
 
-        <!-- Weather Pinpoint Click Interaction Mode Toggle -->
-        <div class="layer-mode-toggle-card">
-          <div class="mode-toggle-left">
-            <span class="mode-icon">🌦️</span>
-            <div class="mode-text-wrap">
-              <span class="mode-title">Weather Click Mode</span>
-              <span class="mode-desc">Click map to load forecast &amp; elevation</span>
+            <!-- Marine AIS Vessels Legend Card -->
+            <div class="legend-card">
+              <div class="legend-card-title">🚢 Marine AIS Vessels (Class)</div>
+              <div class="legend-chips-grid">
+                <span class="legend-chip" style="border-left: 3px solid #f59e0b;">🛢️ Tanker</span>
+                <span class="legend-chip" style="border-left: 3px solid #06b6d4;">📦 Container</span>
+                <span class="legend-chip" style="border-left: 3px solid #a855f7;">🛳️ Cruise</span>
+                <span class="legend-chip" style="border-left: 3px solid #3b82f6;">🏗️ Bulk Cargo</span>
+                <span class="legend-chip" style="border-left: 3px solid #10b981;">🎣 Fishing</span>
+                <span class="legend-chip" style="border-left: 3px solid #60a5fa;">⚓ Tugboat</span>
+              </div>
+            </div>
+
+            <!-- Active Wildfires Legend Card -->
+            <div class="legend-card">
+              <div class="legend-card-title">🔥 Wildfires &amp; Thermal Radiative Power</div>
+              <div class="legend-chips-grid">
+                <span class="legend-chip" style="border-left: 3px solid #f97316;">🔥 Flame (&gt;20 MW)</span>
+                <span class="legend-chip" style="border-left: 3px solid #ef4444;">🌡️ Flare (&gt;350 K)</span>
+              </div>
             </div>
           </div>
-          <label class="layer-toggle-switch" for="toggle-weather-click-mode">
-            <input type="checkbox" id="toggle-weather-click-mode" checked>
-            <span class="toggle-slider"></span>
-          </label>
         </div>
 
-        <!-- Scrollable Accordion Container with Sleek Custom Scrollbar -->
-        <div class="layer-menu-scrollable-body">
-          <!-- Accordion Section 1: Basemaps & Vector World (Default: OpenStreetMap Standard Street Map) -->
-          <div class="layer-accordion-item open" data-accordion="basemaps">
-            <button class="layer-accordion-header" type="button">
-              <div class="accordion-title-wrap">
-                <span class="accordion-icon">🗺️</span>
-                <span class="accordion-title">Basemaps &amp; Street Maps</span>
-              </div>
-              <span class="accordion-arrow">▼</span>
+        <!-- Accordion Section 1: Basemaps & Vector World (Default: OpenStreetMap Standard Street Map) -->
+        <div class="layer-accordion-item open" data-accordion="basemaps">
+          <button class="layer-accordion-header" type="button">
+            <div class="accordion-title-wrap">
+              <span class="accordion-icon">🗺️</span>
+              <span class="accordion-title">Basemaps &amp; Street Maps</span>
+            </div>
+            <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="layer-accordion-content">
+            <div class="layer-category-header">🗺️ Vector &amp; Street World Maps</div>
+
+            <button class="layer-option active" data-layer="osm" role="menuitem">
+              <span class="layer-indicator osm-indicator"></span>
+              <span class="layer-info">
+                <span class="layer-text">OpenStreetMap (Default)</span>
+                <span class="layer-res-tag">OSM · Complete Global Street Map</span>
+              </span>
             </button>
-            <div class="layer-accordion-content">
-              <div class="layer-category-header">🗺️ Vector &amp; Street World Maps</div>
 
-              <button class="layer-option active" data-layer="osm" role="menuitem">
-                <span class="layer-indicator osm-indicator"></span>
-                <span class="layer-info">
-                  <span class="layer-text">OpenStreetMap (Default)</span>
-                  <span class="layer-res-tag">OSM · Complete Global Street Map</span>
-                </span>
-              </button>
-
-              <button class="layer-option" data-layer="voyager" role="menuitem">
-                <span class="layer-indicator" style="background:#38bdf8;"></span>
-                <span class="layer-info">
-                  <span class="layer-text">Voyager Vector Map</span>
-                  <span class="layer-res-tag">CartoDB · Borders, Terrain &amp; Cities</span>
-                </span>
-              </button>
+            <button class="layer-option" data-layer="voyager" role="menuitem">
+              <span class="layer-indicator" style="background:#38bdf8;"></span>
+              <span class="layer-info">
+                <span class="layer-text">Voyager Vector Map</span>
+                <span class="layer-res-tag">CartoDB · Borders, Terrain &amp; Cities</span>
+              </span>
+            </button>
 
               <button class="layer-option" data-layer="dark" role="menuitem">
                 <span class="layer-indicator dark-indicator"></span>
@@ -597,6 +613,37 @@
             Download Visible Tiles (ZIP)
           </button>
         </div>
+      </div>
+    </aside>
+
+    <!-- Floating Custom Map Controls (Top Right of Map) -->
+    <div class="map-floating-controls">
+      <div class="control-group">
+        <button id="ctrl-zoom-in" class="map-ctrl-btn" title="Zoom In" aria-label="Zoom In">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button id="ctrl-zoom-out" class="map-ctrl-btn" title="Zoom Out" aria-label="Zoom Out">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+
+      <div class="control-group">
+        <button id="ctrl-reset-view" class="map-ctrl-btn" title="Reset World View" aria-label="Reset to World View">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20"></path>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+        </button>
+        <button id="ctrl-precision" class="map-ctrl-btn" title="Toggle Precision Crosshair Mode" aria-label="Toggle Precision Mode">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+          </svg>
+        </button>
       </div>
     </div>
   </div>

@@ -543,21 +543,10 @@
       selectLocation(center.lat, normalizedLng, { panTo: false });
     });
 
-    // Layer Switcher Fixed Side Panel Toggle & Close
-    const layerToggleBtn = document.getElementById('ctrl-layer-toggle');
-    const layerMenu = document.getElementById('layer-menu');
-    const layerCloseBtn = document.getElementById('btn-close-layer-menu');
-
-    layerToggleBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      layerMenu?.classList.toggle('hidden');
-      updateLiveGSDDisplay();
-    });
-
-    layerCloseBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      layerMenu?.classList.add('hidden');
-    });
+    // Refresh map size for split layout
+    setTimeout(() => {
+      state.map?.invalidateSize();
+    }, 150);
 
     // Layer options click listener
     document.querySelectorAll('.layer-option').forEach(btn => {
@@ -595,7 +584,6 @@
     });
 
     document.getElementById('btn-zoom-1m')?.addEventListener('click', () => {
-      layerMenu?.classList.add('hidden');
       zoomTo1Meter();
     });
     document.getElementById('btn-zoom-to-1m')?.addEventListener('click', () => {
@@ -609,20 +597,12 @@
 
     // Visible Tile Downloader triggers
     document.getElementById('btn-download-tiles')?.addEventListener('click', () => {
-      layerMenu?.classList.add('hidden');
       openTileDownloadModal();
     });
     document.getElementById('tile-modal-close')?.addEventListener('click', closeTileDownloadModal);
     document.getElementById('btn-cancel-download')?.addEventListener('click', closeTileDownloadModal);
     document.getElementById('tile-modal-backdrop')?.addEventListener('click', closeTileDownloadModal);
     document.getElementById('btn-start-download')?.addEventListener('click', startTileDownload);
-
-    // Close layer menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!layerMenu?.contains(e.target) && !layerToggleBtn?.contains(e.target)) {
-        layerMenu?.classList.add('hidden');
-      }
-    });
   }
 
   function setupAccordionUI() {
