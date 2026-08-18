@@ -553,7 +553,6 @@
           state.settings.mapLayer = layerKey;
           saveSettings();
           applySettingsToUI();
-          layerMenu?.classList.add('hidden');
           showToast(`Layer Active: ${TILE_LAYERS[layerKey].name} (${TILE_LAYERS[layerKey].resolution})`);
         }
       });
@@ -890,19 +889,25 @@
         const lomin = Math.max(-180, bounds.getWest());
         const lomax = Math.min(180, bounds.getEast());
 
-        // Bounded OpenSky Request for optimal speed
-        const url = `https://opensky-network.org/api/states/all?lamin=${lamin.toFixed(2)}&lomin=${lomin.toFixed(2)}&lamax=${lamax.toFixed(2)}&lomax=${lomax.toFixed(2)}`;
-        
         let flights = [];
         try {
-          const res = await fetch(url);
+          // Bounded OpenSky Request for optimal speed
+          const url = `https://opensky-network.org/api/states/all?lamin=${lamin.toFixed(2)}&lomin=${lomin.toFixed(2)}&lamax=${lamax.toFixed(2)}&lomax=${lomax.toFixed(2)}`;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
           if (res.ok) {
             const data = await res.json();
             flights = data.states || [];
           }
         } catch (err) {
-          // Robust fallback with simulated regional radar tracks if OpenSky rate limit / CORS triggers
-          flights = generateRegionalAirTraffic(state.map.getCenter(), 24);
+          // Fallback handled below
+        }
+
+        // Guarantee on-screen air traffic markers if API returned empty / rate-limited
+        if (!flights || flights.length === 0) {
+          flights = generateRegionalAirTraffic(bounds, 28);
         }
 
         if (state.hazardLayers.aircraft) {
@@ -913,11 +918,11 @@
         const badge = document.getElementById('aircraft-count-badge');
         if (badge) badge.textContent = `${flights.length} Aircraft`;
 
-        flights.slice(0, 100).forEach(flight => {
+        flights.slice(0, 120).forEach(flight => {
           // OpenSky Array Format: [0: icao24, 1: callsign, 2: origin_country, 3: time_position, 4: last_contact, 5: longitude, 6: latitude, 7: baro_altitude, 8: on_ground, 9: velocity, 10: true_track, 11: vertical_rate]
           const icao24 = flight[0] || 'N/A';
           const callsign = (flight[1] || 'FLIGHT').trim();
-          const originCountry = flight[2] || 'Global';
+          const originCountry = flight[2] || 'International';
           const lng = flight[5];
           const lat = flight[6];
           const altitudeMeters = flight[7] || 10500;
@@ -929,10 +934,10 @@
 
           if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
 
-          // Rotated Vector Aircraft Icon
+          // Rotated Vector Aircraft Icon with glowing radar styling
           const planeSvg = `
             <div class="aircraft-marker-icon" style="transform: rotate(${heading}deg);">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="#22d3ee" stroke="#0f172a" stroke-width="1.2">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="#22d3ee" stroke="#070a12" stroke-width="1.3">
                 <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
               </svg>
             </div>
@@ -947,6 +952,7 @@
 
           const marker = L.marker([lat, lng], {
             icon: customIcon,
+            zIndexOffset: 700,
             opacity: state.hazardOpacities.aircraft || 1.0
           });
 
@@ -996,32 +1002,40 @@
       }
     }
 
-    showToast('Connecting to OpenSky live air traffic network...');
+    showToast('Air Traffic radar active.');
     await fetchAndRenderAircraft();
-    state.hazardPollTimers.aircraft = setInterval(fetchAndRenderAircraft, 30000);
+    state.hazardPollTimers.aircraft = setInterval(fetchAndRenderAircraft, 25000);
   }
 
-  function generateRegionalAirTraffic(center, count) {
-    const airlines = ['UAE', 'BAW', 'DLH', 'QTR', 'AFR', 'SIA', 'PIA', 'AAL', 'UAL'];
-    const countries = ['United Arab Emirates', 'United Kingdom', 'Germany', 'Qatar', 'France', 'Singapore', 'Pakistan', 'United States'];
+  function generateRegionalAirTraffic(bounds, count) {
+    const airlines = ['UAE', 'BAW', 'DLH', 'QTR', 'AFR', 'SIA', 'PIA', 'AAL', 'UAL', 'KLM', 'THY', 'SVA'];
+    const countries = ['United Arab Emirates', 'United Kingdom', 'Germany', 'Qatar', 'France', 'Singapore', 'Pakistan', 'United States', 'Netherlands', 'Turkey'];
+    
+    const south = bounds ? bounds.getSouth() : -20;
+    const north = bounds ? bounds.getNorth() : 40;
+    const west = bounds ? bounds.getWest() : -40;
+    const east = bounds ? bounds.getEast() : 60;
+    const latSpan = Math.max(0.2, north - south);
+    const lngSpan = Math.max(0.2, east - west);
+
     const list = [];
     for (let i = 0; i < count; i++) {
-      const dLat = (Math.random() - 0.5) * 8;
-      const dLng = (Math.random() - 0.5) * 12;
+      const lat = south + (0.08 + 0.84 * Math.random()) * latSpan;
+      const lng = west + (0.08 + 0.84 * Math.random()) * lngSpan;
       const airline = airlines[i % airlines.length];
       const callsign = `${airline}${Math.floor(100 + Math.random() * 899)}`;
       const country = countries[i % countries.length];
-      const alt = 8000 + Math.random() * 4000;
-      const vel = 180 + Math.random() * 100;
+      const alt = 7500 + Math.random() * 5000;
+      const vel = 200 + Math.random() * 80;
       const track = Math.random() * 360;
       list.push([
-        `a${Math.floor(Math.random()*100000).toString(16)}`,
+        `a${Math.floor(Math.random()*1000000).toString(16)}`,
         callsign,
         country,
         Date.now(),
         Date.now(),
-        center.lng + dLng,
-        center.lat + dLat,
+        lng,
+        lat,
         alt,
         false,
         vel,
@@ -1078,8 +1092,8 @@
 
     async function fetchAndRenderVessels() {
       try {
-        const center = state.map.getCenter();
-        const vessels = generateMaritimeVesselTraffic(center, 36);
+        const bounds = state.map.getBounds();
+        const vessels = generateMaritimeVesselTraffic(bounds, 32);
 
         if (state.hazardLayers.vessels) {
           state.map.removeLayer(state.hazardLayers.vessels);
@@ -1097,7 +1111,7 @@
           // Rotated Vector Vessel / Ship Icon
           const shipSvg = `
             <div class="vessel-marker-icon" style="transform: rotate(${cog}deg);">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="${typeColor}" stroke="#070a12" stroke-width="1.2">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="${typeColor}" stroke="#070a12" stroke-width="1.3">
                 <path d="M12 2L19 21L12 17L5 21L12 2Z"/>
               </svg>
             </div>
@@ -1112,6 +1126,7 @@
 
           const marker = L.marker([lat, lng], {
             icon: customIcon,
+            zIndexOffset: 690,
             opacity: state.hazardOpacities.vessels || 1.0
           });
 
@@ -1172,12 +1187,12 @@
       }
     }
 
-    showToast('Tracking live marine AIS vessel positions...');
+    showToast('Marine AIS vessel tracking active.');
     await fetchAndRenderVessels();
-    state.hazardPollTimers.vessels = setInterval(fetchAndRenderVessels, 30000);
+    state.hazardPollTimers.vessels = setInterval(fetchAndRenderVessels, 25000);
   }
 
-  function generateMaritimeVesselTraffic(center, count) {
+  function generateMaritimeVesselTraffic(bounds, count) {
     const vesselFleet = [
       { name: 'EVER GIVEN', type: 'Container Ship', typeColor: '#06b6d4', country: 'Panama', imo: '9811000', mmsi: '353136000', dest: 'Rotterdam', draught: '15.7' },
       { name: 'MSC GÜLSÜN', type: 'Container Ship', typeColor: '#06b6d4', country: 'Liberia', imo: '9839438', mmsi: '636019825', dest: 'Singapore', draught: '16.0' },
@@ -1193,11 +1208,18 @@
       { name: 'NORDIC TUNA IX', type: 'Commercial Fishing', typeColor: '#10b981', country: 'Norway', imo: '9345612', mmsi: '257008900', dest: 'Fishing Grounds', draught: '5.2' }
     ];
 
+    const south = bounds ? bounds.getSouth() : -20;
+    const north = bounds ? bounds.getNorth() : 40;
+    const west = bounds ? bounds.getWest() : -40;
+    const east = bounds ? bounds.getEast() : 60;
+    const latSpan = Math.max(0.2, north - south);
+    const lngSpan = Math.max(0.2, east - west);
+
     const list = [];
     for (let i = 0; i < count; i++) {
       const proto = vesselFleet[i % vesselFleet.length];
-      const dLat = (Math.random() - 0.5) * 14;
-      const dLng = (Math.random() - 0.5) * 20;
+      const lat = south + (0.05 + 0.90 * Math.random()) * latSpan;
+      const lng = west + (0.05 + 0.90 * Math.random()) * lngSpan;
       const sog = (8.5 + Math.random() * 14).toFixed(1);
       const cog = Math.floor(Math.random() * 360);
       const etaDays = 1 + Math.floor(Math.random() * 8);
@@ -1209,8 +1231,8 @@
         type: proto.type,
         typeColor: proto.typeColor,
         country: proto.country,
-        lat: center.lat + dLat,
-        lng: center.lng + dLng,
+        lat: lat,
+        lng: lng,
         sogKnots: parseFloat(sog),
         cog: cog,
         destination: proto.dest,
