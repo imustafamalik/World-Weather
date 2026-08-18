@@ -730,33 +730,7 @@
       updateLayerOpacity('vessels', val / 100);
     });
 
-    // 8. Global Forest Cover Toggle & Opacity Slider
-    const forestToggle = document.getElementById('toggle-layer-forest');
-    const forestSlider = document.getElementById('slider-opacity-forest');
-    const forestVal = document.getElementById('val-opacity-forest');
-
-    forestToggle?.addEventListener('change', (e) => toggleForestLayer(e.target.checked));
-    forestSlider?.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (forestVal) forestVal.textContent = `${val}%`;
-      state.hazardOpacities.forest = val / 100;
-      updateLayerOpacity('forest', val / 100);
-    });
-
-    // 9. Global River Networks Toggle & Opacity Slider
-    const riversToggle = document.getElementById('toggle-layer-rivers');
-    const riversSlider = document.getElementById('slider-opacity-rivers');
-    const riversVal = document.getElementById('val-opacity-rivers');
-
-    riversToggle?.addEventListener('change', (e) => toggleRiversLayer(e.target.checked));
-    riversSlider?.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (riversVal) riversVal.textContent = `${val}%`;
-      state.hazardOpacities.rivers = val / 100;
-      updateLayerOpacity('rivers', val / 100);
-    });
-
-    // 10. Labels & Places Opacity Slider
+    // 8. Labels & Places Opacity Slider
     const labelsSlider = document.getElementById('slider-opacity-labels');
     const labelsVal = document.getElementById('val-opacity-labels');
     labelsSlider?.addEventListener('input', (e) => {
