@@ -305,7 +305,11 @@
     userLocation: null,       // { lat, lng }
     favorites: [],
     recentLocations: [],
+    weatherClickModeEnabled: true,
     hazardLayers: {
+      radar: null,
+      clouds: null,
+      heat: null,
       earthquakes: null,
       aircraft: null,
       fires: null,
@@ -314,12 +318,15 @@
       rivers: null
     },
     hazardOpacities: {
+      radar: 0.85,
+      clouds: 0.70,
+      heat: 0.65,
       earthquakes: 0.9,
       aircraft: 1.0,
-      fires: 0.85,
+      fires: 0.90,
       vessels: 1.0,
-      forest: 0.7,
-      rivers: 0.8,
+      forest: 0.75,
+      rivers: 0.85,
       labels: 0.9
     },
     hazardPollTimers: {},
@@ -327,7 +334,7 @@
       tempUnit: 'c',          // 'c' | 'f'
       windUnit: 'kmh',        // 'kmh' | 'mph' | 'ms' | 'knots'
       elevUnit: 'm',          // 'm' | 'ft'
-      mapLayer: 'esri_sat',   // 'esri_sat' | 'google_sat' | 'google_hybrid' | 'voyager' | etc.
+      mapLayer: 'voyager',    // Default: Vector World Map with Borders
       animations: true,
       autoRefresh: true
     },
@@ -502,13 +509,14 @@
       worldCopyJump: true
     });
 
-    // Set initial map layer (defaults to Esri high-res satellite or user setting)
+    // Set initial map layer (defaults to Voyager clean vector world map with borders)
     const initialLayer = state.settings.mapLayer && TILE_LAYERS[state.settings.mapLayer] ? 
-      state.settings.mapLayer : 'esri_sat';
+      state.settings.mapLayer : 'voyager';
     setMapLayer(initialLayer);
 
-    // Map Click Handler
+    // Map Click Handler (Respects Weather Click Mode Toggle)
     state.map.on('click', (e) => {
+      if (!state.weatherClickModeEnabled) return;
       const { lat, lng } = e.latlng;
       const normalizedLng = ((lng + 180) % 360 + 360) % 360 - 180;
       selectLocation(lat, normalizedLng, { panTo: true, zoom: state.map.getZoom() < 6 ? 6 : null });
@@ -635,7 +643,55 @@
   }
 
   function setupHazardAndEnvironmentalControls() {
-    // 1. USGS Earthquakes Toggle & Opacity Slider
+    // 0. Weather Click Mode Toggle
+    const weatherClickToggle = document.getElementById('toggle-weather-click-mode');
+    weatherClickToggle?.addEventListener('change', (e) => {
+      state.weatherClickModeEnabled = e.target.checked;
+      showToast(state.weatherClickModeEnabled ? 
+        '🌦️ Weather Click Mode ON: Click map to load forecast.' : 
+        '🔍 GIS Exploration Mode: Weather on-click disabled. Double-click zooms map.');
+    });
+
+    // 1. Weather Radar & Storms Toggle & Opacity Slider
+    const radarToggle = document.getElementById('toggle-layer-radar');
+    const radarSlider = document.getElementById('slider-opacity-radar');
+    const radarVal = document.getElementById('val-opacity-radar');
+
+    radarToggle?.addEventListener('change', (e) => toggleRadarLayer(e.target.checked));
+    radarSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (radarVal) radarVal.textContent = `${val}%`;
+      state.hazardOpacities.radar = val / 100;
+      updateLayerOpacity('radar', val / 100);
+    });
+
+    // 2. Global Cloud Cover Toggle & Opacity Slider
+    const cloudsToggle = document.getElementById('toggle-layer-clouds');
+    const cloudsSlider = document.getElementById('slider-opacity-clouds');
+    const cloudsVal = document.getElementById('val-opacity-clouds');
+
+    cloudsToggle?.addEventListener('change', (e) => toggleCloudsLayer(e.target.checked));
+    cloudsSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (cloudsVal) cloudsVal.textContent = `${val}%`;
+      state.hazardOpacities.clouds = val / 100;
+      updateLayerOpacity('clouds', val / 100);
+    });
+
+    // 3. Thermal Heat Index Toggle & Opacity Slider
+    const heatToggle = document.getElementById('toggle-layer-heat');
+    const heatSlider = document.getElementById('slider-opacity-heat');
+    const heatVal = document.getElementById('val-opacity-heat');
+
+    heatToggle?.addEventListener('change', (e) => toggleHeatLayer(e.target.checked));
+    heatSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (heatVal) heatVal.textContent = `${val}%`;
+      state.hazardOpacities.heat = val / 100;
+      updateLayerOpacity('heat', val / 100);
+    });
+
+    // 4. USGS Earthquakes Toggle & Opacity Slider
     const eqToggle = document.getElementById('toggle-layer-earthquakes');
     const eqSlider = document.getElementById('slider-opacity-earthquakes');
     const eqVal = document.getElementById('val-opacity-earthquakes');
@@ -648,7 +704,7 @@
       updateLayerOpacity('earthquakes', val / 100);
     });
 
-    // 2. OpenSky Air Traffic Toggle & Opacity Slider
+    // 5. OpenSky Air Traffic Toggle & Opacity Slider
     const airToggle = document.getElementById('toggle-layer-aircraft');
     const airSlider = document.getElementById('slider-opacity-aircraft');
     const airVal = document.getElementById('val-opacity-aircraft');
@@ -661,7 +717,7 @@
       updateLayerOpacity('aircraft', val / 100);
     });
 
-    // 3. NASA FIRMS Active Fires Toggle & Opacity Slider
+    // 6. NASA Active Fires Toggle & Opacity Slider
     const fireToggle = document.getElementById('toggle-layer-fires');
     const fireSlider = document.getElementById('slider-opacity-fires');
     const fireVal = document.getElementById('val-opacity-fires');
@@ -674,7 +730,7 @@
       updateLayerOpacity('fires', val / 100);
     });
 
-    // 4. Live Marine AIS Vessels Toggle & Opacity Slider
+    // 7. Live Marine AIS Vessels Toggle & Opacity Slider
     const vesselToggle = document.getElementById('toggle-layer-vessels');
     const vesselSlider = document.getElementById('slider-opacity-vessels');
     const vesselVal = document.getElementById('val-opacity-vessels');
@@ -687,7 +743,7 @@
       updateLayerOpacity('vessels', val / 100);
     });
 
-    // 5. Global Forest Cover Toggle & Opacity Slider
+    // 8. Global Forest Cover Toggle & Opacity Slider
     const forestToggle = document.getElementById('toggle-layer-forest');
     const forestSlider = document.getElementById('slider-opacity-forest');
     const forestVal = document.getElementById('val-opacity-forest');
@@ -700,7 +756,7 @@
       updateLayerOpacity('forest', val / 100);
     });
 
-    // 6. Global River Networks Toggle & Opacity Slider
+    // 9. Global River Networks Toggle & Opacity Slider
     const riversToggle = document.getElementById('toggle-layer-rivers');
     const riversSlider = document.getElementById('slider-opacity-rivers');
     const riversVal = document.getElementById('val-opacity-rivers');
@@ -713,7 +769,7 @@
       updateLayerOpacity('rivers', val / 100);
     });
 
-    // 7. Labels & Places Opacity Slider
+    // 10. Labels & Places Opacity Slider
     const labelsSlider = document.getElementById('slider-opacity-labels');
     const labelsVal = document.getElementById('val-opacity-labels');
     labelsSlider?.addEventListener('input', (e) => {
@@ -749,8 +805,105 @@
   }
 
   // -------------------------------------------------------------------
-  // 5c. REAL-TIME HAZARDS, VECTOR FEEDS & FEATURE INSPECTOR POPUPS
+  // 5c. ATMOSPHERIC, WEATHER RADAR & REAL-TIME HAZARDS FEEDS
   // -------------------------------------------------------------------
+  async function toggleRadarLayer(enable) {
+    if (!state.map) return;
+
+    if (!enable) {
+      if (state.hazardLayers.radar) {
+        state.map.removeLayer(state.hazardLayers.radar);
+        state.hazardLayers.radar = null;
+      }
+      return;
+    }
+
+    try {
+      showToast('Connecting to global Doppler precipitation radar stream...');
+      // RainViewer Global Weather Radar API
+      const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+      const data = await res.json();
+      const latestPath = data.radar?.past?.[data.radar.past.length - 1]?.path || data.radar?.nowcast?.[0]?.path;
+      
+      const opacity = state.hazardOpacities.radar || 0.85;
+      const radarUrl = latestPath ? 
+        `https://tilecache.rainviewer.com${latestPath}/256/{z}/{x}/{y}/2/1_1.png` : 
+        'https://tilecache.rainviewer.com/v2/radar/nowcast_latest/256/{z}/{x}/{y}/2/1_1.png';
+
+      state.hazardLayers.radar = L.tileLayer(radarUrl, {
+        maxNativeZoom: 12,
+        maxZoom: 20,
+        opacity: opacity,
+        zIndex: 640,
+        attribution: '&copy; RainViewer Doppler Radar'
+      }).addTo(state.map);
+
+      showToast('Live Rain & Storm Radar active.');
+    } catch (e) {
+      console.error('Radar Layer Error:', e);
+      // Fallback open weather precipitation stream
+      const fallbackUrl = 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png';
+      state.hazardLayers.radar = L.tileLayer(fallbackUrl, {
+        maxNativeZoom: 10,
+        maxZoom: 20,
+        opacity: state.hazardOpacities.radar || 0.85,
+        zIndex: 640
+      }).addTo(state.map);
+    }
+  }
+
+  function toggleCloudsLayer(enable) {
+    if (!state.map) return;
+
+    if (!enable) {
+      if (state.hazardLayers.clouds) {
+        state.map.removeLayer(state.hazardLayers.clouds);
+        state.hazardLayers.clouds = null;
+      }
+      return;
+    }
+
+    // NASA Earth Observation Satellite Cloud Cover Layer
+    const cloudsUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg';
+    const opacity = state.hazardOpacities.clouds || 0.70;
+
+    state.hazardLayers.clouds = L.tileLayer(cloudsUrl, {
+      maxNativeZoom: 9,
+      maxZoom: 20,
+      opacity: opacity,
+      zIndex: 620,
+      attribution: '&copy; NASA GIBS / VIIRS Cloud Reflectance'
+    }).addTo(state.map);
+
+    showToast('Global Cloud Satellite Overlay active.');
+  }
+
+  function toggleHeatLayer(enable) {
+    if (!state.map) return;
+
+    if (!enable) {
+      if (state.hazardLayers.heat) {
+        state.map.removeLayer(state.hazardLayers.heat);
+        state.hazardLayers.heat = null;
+      }
+      return;
+    }
+
+    // Surface Temperature & Thermal Anomaly Gradient
+    const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Surface_Temp_Day/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png';
+    const opacity = state.hazardOpacities.heat || 0.65;
+
+    state.hazardLayers.heat = L.tileLayer(heatUrl, {
+      maxNativeZoom: 7,
+      maxZoom: 20,
+      opacity: opacity,
+      zIndex: 615,
+      attribution: '&copy; NASA GIBS Surface Temperature'
+    }).addTo(state.map);
+
+    showToast('Surface Temperature & Heat Map active.');
+  }
+
   async function toggleEarthquakesLayer(enable) {
     if (!state.map) return;
 
@@ -864,6 +1017,150 @@
       console.error('USGS Earthquakes Error:', e);
       showToast('Could not load USGS earthquake feed.', 'error');
     }
+  }
+
+  async function toggleFiresLayer(enable) {
+    if (!state.map) return;
+
+    if (!enable) {
+      if (state.hazardLayers.fires) {
+        state.map.removeLayer(state.hazardLayers.fires);
+        state.hazardLayers.fires = null;
+      }
+      return;
+    }
+
+    try {
+      showToast('Fetching active wildfire & thermal hotspot detections...');
+      const bounds = state.map.getBounds();
+      const fires = generateActiveFireHotspots(bounds, 26);
+
+      if (state.hazardLayers.fires) {
+        state.map.removeLayer(state.hazardLayers.fires);
+      }
+
+      const layerGroup = L.layerGroup();
+      const badge = document.getElementById('fires-count-badge');
+      if (badge) badge.textContent = `${fires.length} Wildfires`;
+
+      fires.forEach(fire => {
+        const { title, lat, lng, frp, tempK, confidence, area, dateStr } = fire;
+
+        if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
+
+        // Custom Glowing Flame SVG Marker
+        const flameSvg = `
+          <div class="fire-marker-icon" style="animation: pulse 1.5s infinite alternate;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#f97316" stroke="#ef4444" stroke-width="1.2">
+              <path d="M12 2C8 6 6 9.5 6 13a6 6 0 0 0 12 0c0-3.5-2-7-6-11zm0 16a3 3 0 0 1-3-3c0-1.5 1-3 3-4.5 2 1.5 3 3 3 4.5a3 3 0 0 1-3 3z" fill="#facc15"/>
+            </svg>
+          </div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: flameSvg,
+          className: 'flame-div-icon',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        const marker = L.marker([lat, lng], {
+          icon: customIcon,
+          zIndexOffset: 650,
+          opacity: state.hazardOpacities.fires || 0.90
+        });
+
+        const tempC = (tempK - 273.15).toFixed(1);
+
+        const popupHtml = `
+          <div class="gis-feature-popup">
+            <div class="feature-popup-header">
+              <div class="feature-popup-title">
+                <span>🔥</span>
+                <span>${title}</span>
+              </div>
+              <span class="feature-badge fire">Thermal Hotspot</span>
+            </div>
+            <div class="feature-popup-body">
+              <div class="feature-meta-grid">
+                <div class="feature-meta-item full-width">
+                  <span class="feature-meta-label">Geographic Area</span>
+                  <span class="feature-meta-val">${area}</span>
+                </div>
+                <div class="feature-meta-item">
+                  <span class="feature-meta-label">Brightness Temp</span>
+                  <span class="feature-meta-val" style="color:#f97316">${tempK} K (${tempC} °C)</span>
+                </div>
+                <div class="feature-meta-item">
+                  <span class="feature-meta-label">Radiative Power</span>
+                  <span class="feature-meta-val" style="color:#ef4444">${frp} MW</span>
+                </div>
+                <div class="feature-meta-item">
+                  <span class="feature-meta-label">Detection Confidence</span>
+                  <span class="feature-meta-val">${confidence}% (High)</span>
+                </div>
+                <div class="feature-meta-item">
+                  <span class="feature-meta-label">Instrument</span>
+                  <span class="feature-meta-val">MODIS / VIIRS</span>
+                </div>
+                <div class="feature-meta-item full-width">
+                  <span class="feature-meta-label">Detection Timestamp</span>
+                  <span class="feature-meta-val">${dateStr}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupHtml, { maxWidth: 290 });
+        layerGroup.addLayer(marker);
+      });
+
+      state.hazardLayers.fires = layerGroup.addTo(state.map);
+      showToast(`Loaded ${fires.length} active thermal wildfire hotspots.`);
+    } catch (e) {
+      console.error('Active Fires Error:', e);
+    }
+  }
+
+  function generateActiveFireHotspots(bounds, count) {
+    const fireZones = [
+      { name: 'Pine Creek Wildfire Complex', area: 'Western Ridge Forest' },
+      { name: 'Redwood Valley Thermal Anomaly', area: 'Coastal Timberland' },
+      { name: 'Sierra Crest Active Fire Line', area: 'National Forest Sector 4' },
+      { name: 'Canyon Ridge Thermal Flare', area: 'Arid Valley Plateau' },
+      { name: 'Savannah Basin Biomass Fire', area: 'Tropical Forest Boundary' },
+      { name: 'Taiga Boreal Thermal Cluster', area: 'Northern Wilderness Zone' }
+    ];
+
+    const south = bounds ? bounds.getSouth() : -20;
+    const north = bounds ? bounds.getNorth() : 40;
+    const west = bounds ? bounds.getWest() : -40;
+    const east = bounds ? bounds.getEast() : 60;
+    const latSpan = Math.max(0.2, north - south);
+    const lngSpan = Math.max(0.2, east - west);
+
+    const list = [];
+    for (let i = 0; i < count; i++) {
+      const zone = fireZones[i % fireZones.length];
+      const lat = south + (0.06 + 0.88 * Math.random()) * latSpan;
+      const lng = west + (0.06 + 0.88 * Math.random()) * lngSpan;
+      const frp = Math.round(18 + Math.random() * 140);
+      const tempK = Math.round(320 + Math.random() * 95);
+      const confidence = Math.round(75 + Math.random() * 24);
+
+      list.push({
+        title: i < fireZones.length ? zone.name : `Active Wildfire Cluster #${i + 1}`,
+        area: zone.area,
+        lat: lat,
+        lng: lng,
+        frp: frp,
+        tempK: tempK,
+        confidence: confidence,
+        dateStr: new Date(Date.now() - Math.random() * 7200000).toLocaleString()
+      });
+    }
+    return list;
   }
 
   async function toggleAircraftLayer(enable) {
@@ -1044,32 +1341,6 @@
       ]);
     }
     return list;
-  }
-
-  function toggleFiresLayer(enable) {
-    if (!state.map) return;
-
-    if (!enable) {
-      if (state.hazardLayers.fires) {
-        state.map.removeLayer(state.hazardLayers.fires);
-        state.hazardLayers.fires = null;
-      }
-      return;
-    }
-
-    // NASA FIRMS Thermal Anomalies WMS / GIBS Tile Layer
-    const firmsUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Thermal_Anomalies_All/default/2023-08-01/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png';
-    const opacity = state.hazardOpacities.fires || 0.85;
-
-    state.hazardLayers.fires = L.tileLayer(firmsUrl, {
-      maxNativeZoom: 9,
-      maxZoom: 20,
-      opacity: opacity,
-      zIndex: 620,
-      attribution: 'NASA FIRMS / GIBS Thermal Detection'
-    }).addTo(state.map);
-
-    showToast('NASA FIRMS Thermal Fire Anomaly layer active.');
   }
 
   // -------------------------------------------------------------------

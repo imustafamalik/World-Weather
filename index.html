@@ -147,7 +147,7 @@
         <span class="sat-btn-label">Layers</span>
       </button>
 
-      <!-- GIS Multi-Source Layer Manager with Collapsible Accordions & Real-Time Data -->
+      <!-- GIS Multi-Source Layer Manager with Weather Mode Toggle & Real-Time Streams -->
       <div id="layer-menu" class="layer-menu hidden" role="menu" aria-label="GIS Layer Manager">
         <!-- Live GSD Resolution & Scale Telemetry Header -->
         <div class="layer-menu-resolution-bar">
@@ -162,312 +162,408 @@
           </div>
         </div>
 
-        <!-- Accordion Section 1: Basemaps (Satellite & Vector) -->
-        <div class="layer-accordion-item open" data-accordion="basemaps">
-          <button class="layer-accordion-header" type="button">
-            <div class="accordion-title-wrap">
-              <span class="accordion-icon">🗺️</span>
-              <span class="accordion-title">Basemaps &amp; Satellite</span>
+        <!-- Weather Pinpoint Click Interaction Mode Toggle -->
+        <div class="layer-mode-toggle-card">
+          <div class="mode-toggle-left">
+            <span class="mode-icon">🌦️</span>
+            <div class="mode-text-wrap">
+              <span class="mode-title">Weather Click Mode</span>
+              <span class="mode-desc">Click map to load forecast &amp; elevation</span>
             </div>
-            <span class="accordion-arrow">▼</span>
-          </button>
-          <div class="layer-accordion-content">
-            <div class="layer-category-header">🛰️ High-Resolution Satellite (≤ 1 m)</div>
-            
-            <button class="layer-option active" data-layer="esri_sat" role="menuitem">
-              <span class="layer-indicator sat-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Esri World Imagery</span>
-                <span class="layer-res-tag">Maxar · 0.3–1 m (Global)</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="google_sat" role="menuitem">
-              <span class="layer-indicator google-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Google High-Res Satellite</span>
-                <span class="layer-res-tag">GeoEye / Maxar · 0.5–1 m (Global)</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="google_hybrid" role="menuitem">
-              <span class="layer-indicator google-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Google Hybrid</span>
-                <span class="layer-res-tag">Satellite + Roads &amp; Labels</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="esri_clarity" role="menuitem">
-              <span class="layer-indicator clarity-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Esri Clarity (Cloudless Archival)</span>
-                <span class="layer-res-tag">Clear Composite · Sub-Meter</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="usgs_imagery" role="menuitem">
-              <span class="layer-indicator landsat-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">USGS National Map Aerial</span>
-                <span class="layer-res-tag">USGS Ortho · 0.3–1 m High-Res</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="usda_naip" role="menuitem">
-              <span class="layer-indicator naip-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">USDA NAIP Aerial</span>
-                <span class="layer-res-tag">Agricultural Ortho · 0.6–1 m</span>
-              </span>
-            </button>
-
-            <div class="layer-category-header">🌍 Earth Observation &amp; Topographic</div>
-
-            <button class="layer-option" data-layer="esa_sentinel2" role="menuitem">
-              <span class="layer-indicator esa-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">ESA Sentinel-2 Cloudless</span>
-                <span class="layer-res-tag">Copernicus · 10 m Multispectral</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="nasa_modis" role="menuitem">
-              <span class="layer-indicator nasa-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">NASA MODIS Terra TrueColor</span>
-                <span class="layer-res-tag">NASA GIBS · 250 m Daily Reflectance</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="nasa_night" role="menuitem">
-              <span class="layer-indicator nasa-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">NASA Earth at Night</span>
-                <span class="layer-res-tag">VIIRS Day/Night Band · City Lights</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="opentopo" role="menuitem">
-              <span class="layer-indicator topo-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">OpenTopoMap</span>
-                <span class="layer-res-tag">SRTM Topographic Relief &amp; Contours</span>
-              </span>
-            </button>
-
-            <div class="layer-category-header">🗺️ Vector Street Maps</div>
-
-            <button class="layer-option" data-layer="voyager" role="menuitem">
-              <span class="layer-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Standard Voyager</span>
-                <span class="layer-res-tag">CartoDB · Detailed Street &amp; Terrain</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="dark" role="menuitem">
-              <span class="layer-indicator dark-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">Dark Night Mode</span>
-                <span class="layer-res-tag">CartoDB · Dark Minimal</span>
-              </span>
-            </button>
-
-            <button class="layer-option" data-layer="osm" role="menuitem">
-              <span class="layer-indicator osm-indicator"></span>
-              <span class="layer-info">
-                <span class="layer-text">OpenStreetMap Standard</span>
-                <span class="layer-res-tag">OSM · Global Community</span>
-              </span>
-            </button>
           </div>
+          <label class="layer-toggle-switch" for="toggle-weather-click-mode">
+            <input type="checkbox" id="toggle-weather-click-mode" checked>
+            <span class="toggle-slider"></span>
+          </label>
         </div>
 
-        <!-- Accordion Section 2: Real-time Hazards & Traffic -->
-        <div class="layer-accordion-item" data-accordion="hazards">
-          <button class="layer-accordion-header" type="button">
-            <div class="accordion-title-wrap">
-              <span class="accordion-icon">⚡</span>
-              <span class="accordion-title">Real-Time Hazards &amp; Traffic</span>
-            </div>
-            <span class="accordion-arrow">▶</span>
-          </button>
-          <div class="layer-accordion-content hidden">
-            <!-- Earthquakes Layer -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-earthquakes">
-                  <input type="checkbox" id="toggle-layer-earthquakes">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🌋 USGS Earthquakes</span>
-                    <span class="layer-status-badge live" id="earthquake-count-badge">Live Feed</span>
-                  </div>
-                  <span class="layer-control-desc">Past 24h &amp; M4.5+ Global Events</span>
-                </div>
+        <!-- Scrollable Accordion Container with Sleek Custom Scrollbar -->
+        <div class="layer-menu-scrollable-body">
+          <!-- Accordion Section 1: Basemaps & Vector World (Default: Vector with Borders) -->
+          <div class="layer-accordion-item open" data-accordion="basemaps">
+            <button class="layer-accordion-header" type="button">
+              <div class="accordion-title-wrap">
+                <span class="accordion-icon">🗺️</span>
+                <span class="accordion-title">Basemaps &amp; Vector Maps</span>
               </div>
-              <div class="layer-slider-wrapper" id="earthquakes-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-earthquakes" min="0" max="100" value="90">
-                <span class="slider-val" id="val-opacity-earthquakes">90%</span>
-              </div>
-            </div>
+              <span class="accordion-arrow">▼</span>
+            </button>
+            <div class="layer-accordion-content">
+              <div class="layer-category-header">🗺️ Vector World Maps with Borders</div>
 
-            <!-- Air Traffic Layer -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-aircraft">
-                  <input type="checkbox" id="toggle-layer-aircraft">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">✈️ Air Traffic (OpenSky)</span>
-                    <span class="layer-status-badge live" id="aircraft-count-badge">Live ADSB</span>
-                  </div>
-                  <span class="layer-control-desc">Real-time aircraft positions &amp; vector headings</span>
-                </div>
-              </div>
-              <div class="layer-slider-wrapper" id="aircraft-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-aircraft" min="0" max="100" value="100">
-                <span class="slider-val" id="val-opacity-aircraft">100%</span>
-              </div>
-            </div>
+              <button class="layer-option active" data-layer="voyager" role="menuitem">
+                <span class="layer-indicator" style="background:#38bdf8;"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Voyager Vector Map (Default)</span>
+                  <span class="layer-res-tag">CartoDB · Borders, Terrain &amp; Cities</span>
+                </span>
+              </button>
 
-            <!-- Active Fires Layer -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-fires">
-                  <input type="checkbox" id="toggle-layer-fires">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🔥 NASA Active Fires</span>
-                    <span class="layer-status-badge thermal" id="fires-count-badge">Thermal</span>
-                  </div>
-                  <span class="layer-control-desc">Global thermal anomalies &amp; wildfire hotspots</span>
-                </div>
-              </div>
-              <div class="layer-slider-wrapper" id="fires-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-fires" min="0" max="100" value="85">
-                <span class="slider-val" id="val-opacity-fires">85%</span>
-              </div>
-            </div>
+              <button class="layer-option" data-layer="osm" role="menuitem">
+                <span class="layer-indicator osm-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">OpenStreetMap Standard</span>
+                  <span class="layer-res-tag">OSM · Complete World Cartography</span>
+                </span>
+              </button>
 
-            <!-- Live Marine Vessels (AIS Traffic) -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-vessels">
-                  <input type="checkbox" id="toggle-layer-vessels">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🚢 Marine Vessels (AIS)</span>
-                    <span class="layer-status-badge blue" id="vessels-count-badge">Live AIS</span>
+              <button class="layer-option" data-layer="dark" role="menuitem">
+                <span class="layer-indicator dark-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Dark Night Minimal</span>
+                  <span class="layer-res-tag">CartoDB · Dark Vector Cartography</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="opentopo" role="menuitem">
+                <span class="layer-indicator topo-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">OpenTopoMap (Topographic)</span>
+                  <span class="layer-res-tag">SRTM Relief, Contours &amp; Elevation</span>
+                </span>
+              </button>
+
+              <div class="layer-category-header">🛰️ High-Resolution Satellite (≤ 1 m)</div>
+              
+              <button class="layer-option" data-layer="esri_sat" role="menuitem">
+                <span class="layer-indicator sat-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Esri World Imagery</span>
+                  <span class="layer-res-tag">Maxar · 0.3–1 m (Global)</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="google_sat" role="menuitem">
+                <span class="layer-indicator google-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Google High-Res Satellite</span>
+                  <span class="layer-res-tag">GeoEye / Maxar · 0.5–1 m (Global)</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="google_hybrid" role="menuitem">
+                <span class="layer-indicator google-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Google Hybrid</span>
+                  <span class="layer-res-tag">Satellite + Roads &amp; Labels</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="esri_clarity" role="menuitem">
+                <span class="layer-indicator clarity-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">Esri Clarity (Cloudless)</span>
+                  <span class="layer-res-tag">Clear Archival · Sub-Meter</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="usgs_imagery" role="menuitem">
+                <span class="layer-indicator landsat-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">USGS National Map Aerial</span>
+                  <span class="layer-res-tag">USGS Ortho · 0.3–1 m High-Res</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="usda_naip" role="menuitem">
+                <span class="layer-indicator naip-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">USDA NAIP Aerial</span>
+                  <span class="layer-res-tag">Agricultural Ortho · 0.6–1 m</span>
+                </span>
+              </button>
+
+              <div class="layer-category-header">🌍 Global Earth Observation</div>
+
+              <button class="layer-option" data-layer="esa_sentinel2" role="menuitem">
+                <span class="layer-indicator esa-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">ESA Sentinel-2 Cloudless</span>
+                  <span class="layer-res-tag">Copernicus · 10 m Multispectral</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="nasa_modis" role="menuitem">
+                <span class="layer-indicator nasa-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">NASA MODIS Terra TrueColor</span>
+                  <span class="layer-res-tag">NASA GIBS · 250 m Planetary View</span>
+                </span>
+              </button>
+
+              <button class="layer-option" data-layer="nasa_night" role="menuitem">
+                <span class="layer-indicator nasa-indicator"></span>
+                <span class="layer-info">
+                  <span class="layer-text">NASA Earth at Night</span>
+                  <span class="layer-res-tag">VIIRS Day/Night Band · City Lights</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Accordion Section 2: Weather Radar, Storms & Atmosphere -->
+          <div class="layer-accordion-item" data-accordion="weather">
+            <button class="layer-accordion-header" type="button">
+              <div class="accordion-title-wrap">
+                <span class="accordion-icon">🌧️</span>
+                <span class="accordion-title">Weather Radar &amp; Storms</span>
+              </div>
+              <span class="accordion-arrow">▶</span>
+            </button>
+            <div class="layer-accordion-content hidden">
+              <!-- Live Precipitation Radar -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-radar">
+                    <input type="checkbox" id="toggle-layer-radar">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌧️ Live Rain &amp; Storm Radar</span>
+                      <span class="layer-status-badge live" id="radar-status-badge">Live Doppler</span>
+                    </div>
+                    <span class="layer-control-desc">Real-time precipitation radar &amp; storm cells</span>
                   </div>
-                  <span class="layer-control-desc">Global cargo, tankers, passenger &amp; fishing ships</span>
+                </div>
+                <div class="layer-slider-wrapper" id="radar-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-radar" min="0" max="100" value="85">
+                  <span class="slider-val" id="val-opacity-radar">85%</span>
                 </div>
               </div>
-              <div class="layer-slider-wrapper" id="vessels-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-vessels" min="0" max="100" value="100">
-                <span class="slider-val" id="val-opacity-vessels">100%</span>
+
+              <!-- Live Cloud Cover -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-clouds">
+                    <input type="checkbox" id="toggle-layer-clouds">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">☁️ Global Cloud Overlay</span>
+                      <span class="layer-status-badge blue">Sat</span>
+                    </div>
+                    <span class="layer-control-desc">Satellite cloud top reflectance &amp; storm fronts</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="clouds-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-clouds" min="0" max="100" value="70">
+                  <span class="slider-val" id="val-opacity-clouds">70%</span>
+                </div>
+              </div>
+
+              <!-- Thermal Heat Index -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-heat">
+                    <input type="checkbox" id="toggle-layer-heat">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌡️ Surface Temperature &amp; Heat</span>
+                      <span class="layer-status-badge thermal">Thermal</span>
+                    </div>
+                    <span class="layer-control-desc">Global heat map &amp; temperature anomaly gradients</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="heat-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-heat" min="0" max="100" value="65">
+                  <span class="slider-val" id="val-opacity-heat">65%</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Accordion Section 3: Environmental & Hydrology -->
-        <div class="layer-accordion-item" data-accordion="environment">
-          <button class="layer-accordion-header" type="button">
-            <div class="accordion-title-wrap">
-              <span class="accordion-icon">🌲</span>
-              <span class="accordion-title">Environmental &amp; Hydrology</span>
-            </div>
-            <span class="accordion-arrow">▶</span>
-          </button>
-          <div class="layer-accordion-content hidden">
-            <!-- Forest Cover Layer -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-forest">
-                  <input type="checkbox" id="toggle-layer-forest">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🌳 Global Forest Canopy</span>
-                    <span class="layer-status-badge green">GFW</span>
+          <!-- Accordion Section 3: Real-time Hazards & Traffic -->
+          <div class="layer-accordion-item" data-accordion="hazards">
+            <button class="layer-accordion-header" type="button">
+              <div class="accordion-title-wrap">
+                <span class="accordion-icon">⚡</span>
+                <span class="accordion-title">Real-Time Hazards &amp; Traffic</span>
+              </div>
+              <span class="accordion-arrow">▶</span>
+            </button>
+            <div class="layer-accordion-content hidden">
+              <!-- Earthquakes Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-earthquakes">
+                    <input type="checkbox" id="toggle-layer-earthquakes">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌋 USGS Earthquakes</span>
+                      <span class="layer-status-badge live" id="earthquake-count-badge">Live Feed</span>
+                    </div>
+                    <span class="layer-control-desc">Past 24h &amp; M4.5+ Global Seismic Events</span>
                   </div>
-                  <span class="layer-control-desc">Global Forest Watch tree cover density</span>
+                </div>
+                <div class="layer-slider-wrapper" id="earthquakes-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-earthquakes" min="0" max="100" value="90">
+                  <span class="slider-val" id="val-opacity-earthquakes">90%</span>
                 </div>
               </div>
-              <div class="layer-slider-wrapper" id="forest-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-forest" min="0" max="100" value="70">
-                <span class="slider-val" id="val-opacity-forest">70%</span>
-              </div>
-            </div>
 
-            <!-- River Networks Layer -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="toggle-layer-rivers">
-                  <input type="checkbox" id="toggle-layer-rivers">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🌊 Global River Networks</span>
-                    <span class="layer-status-badge blue">Hydro</span>
+              <!-- Air Traffic Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-aircraft">
+                    <input type="checkbox" id="toggle-layer-aircraft">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">✈️ Air Traffic Radar</span>
+                      <span class="layer-status-badge live" id="aircraft-count-badge">Live ADS-B</span>
+                    </div>
+                    <span class="layer-control-desc">Live aircraft positions &amp; vector headings</span>
                   </div>
-                  <span class="layer-control-desc">HydroSHEDS &amp; OpenStreetMap waterway lines</span>
+                </div>
+                <div class="layer-slider-wrapper" id="aircraft-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-aircraft" min="0" max="100" value="100">
+                  <span class="slider-val" id="val-opacity-aircraft">100%</span>
                 </div>
               </div>
-              <div class="layer-slider-wrapper" id="rivers-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-rivers" min="0" max="100" value="80">
-                <span class="slider-val" id="val-opacity-rivers">80%</span>
+
+              <!-- Active Fires Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-fires">
+                    <input type="checkbox" id="toggle-layer-fires">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🔥 Active Wildfires &amp; Thermal</span>
+                      <span class="layer-status-badge thermal" id="fires-count-badge">Thermal</span>
+                    </div>
+                    <span class="layer-control-desc">NASA EONET &amp; FIRMS thermal anomaly hotspots</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="fires-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-fires" min="0" max="100" value="90">
+                  <span class="slider-val" id="val-opacity-fires">90%</span>
+                </div>
+              </div>
+
+              <!-- Live Marine Vessels (AIS Traffic) -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-vessels">
+                    <input type="checkbox" id="toggle-layer-vessels">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🚢 Marine Vessels (AIS)</span>
+                      <span class="layer-status-badge blue" id="vessels-count-badge">Live AIS</span>
+                    </div>
+                    <span class="layer-control-desc">Global cargo, tankers, passenger &amp; fishing ships</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="vessels-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-vessels" min="0" max="100" value="100">
+                  <span class="slider-val" id="val-opacity-vessels">100%</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Accordion Section 4: Reference Overlays -->
-        <div class="layer-accordion-item" data-accordion="overlays">
-          <button class="layer-accordion-header" type="button">
-            <div class="accordion-title-wrap">
-              <span class="accordion-icon">🏷️</span>
-              <span class="accordion-title">Reference Overlays</span>
-            </div>
-            <span class="accordion-arrow">▶</span>
-          </button>
-          <div class="layer-accordion-content hidden">
-            <!-- Places & Borders Overlay -->
-            <div class="layer-control-card">
-              <div class="layer-control-header">
-                <label class="layer-toggle-switch" for="overlay-labels-check">
-                  <input type="checkbox" id="overlay-labels-check">
-                  <span class="toggle-slider"></span>
-                </label>
-                <div class="layer-control-label">
-                  <div class="layer-title-row">
-                    <span class="layer-control-name">🏷️ Roads, Places &amp; Borders</span>
+          <!-- Accordion Section 4: Environmental & Hydrology -->
+          <div class="layer-accordion-item" data-accordion="environment">
+            <button class="layer-accordion-header" type="button">
+              <div class="accordion-title-wrap">
+                <span class="accordion-icon">🌲</span>
+                <span class="accordion-title">Environmental &amp; Hydrology</span>
+              </div>
+              <span class="accordion-arrow">▶</span>
+            </button>
+            <div class="layer-accordion-content hidden">
+              <!-- Forest Cover Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-forest">
+                    <input type="checkbox" id="toggle-layer-forest">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌳 Global Forest Canopy</span>
+                      <span class="layer-status-badge green">GFW</span>
+                    </div>
+                    <span class="layer-control-desc">Global tree canopy cover &amp; forest density</span>
                   </div>
-                  <span class="layer-control-desc">Esri Reference boundary &amp; place names</span>
+                </div>
+                <div class="layer-slider-wrapper" id="forest-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-forest" min="0" max="100" value="75">
+                  <span class="slider-val" id="val-opacity-forest">75%</span>
                 </div>
               </div>
-              <div class="layer-slider-wrapper" id="labels-slider-wrap">
-                <span class="slider-label">Opacity</span>
-                <input type="range" class="layer-opacity-slider" id="slider-opacity-labels" min="0" max="100" value="90">
-                <span class="slider-val" id="val-opacity-labels">90%</span>
+
+              <!-- River Networks Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-rivers">
+                    <input type="checkbox" id="toggle-layer-rivers">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌊 River Networks &amp; Waterways</span>
+                      <span class="layer-status-badge blue">Hydro</span>
+                    </div>
+                    <span class="layer-control-desc">OpenStreetMap &amp; HydroSHEDS river channels</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="rivers-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-rivers" min="0" max="100" value="85">
+                  <span class="slider-val" id="val-opacity-rivers">85%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion Section 5: Reference Overlays -->
+          <div class="layer-accordion-item" data-accordion="overlays">
+            <button class="layer-accordion-header" type="button">
+              <div class="accordion-title-wrap">
+                <span class="accordion-icon">🏷️</span>
+                <span class="accordion-title">Reference Overlays</span>
+              </div>
+              <span class="accordion-arrow">▶</span>
+            </button>
+            <div class="layer-accordion-content hidden">
+              <!-- Places & Borders Overlay -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="overlay-labels-check">
+                    <input type="checkbox" id="overlay-labels-check">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🏷️ Roads, Places &amp; Borders</span>
+                    </div>
+                    <span class="layer-control-desc">Esri Reference boundary &amp; place names</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="labels-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-labels" min="0" max="100" value="90">
+                  <span class="slider-val" id="val-opacity-labels">90%</span>
+                </div>
               </div>
             </div>
           </div>

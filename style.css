@@ -718,6 +718,78 @@ a:hover {
   font-weight: 600;
 }
 
+/* Weather Pinpoint Click Mode Toggle Card */
+.layer-mode-toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.12));
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+}
+
+.mode-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-icon {
+  font-size: 15px;
+}
+
+.mode-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mode-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mode-desc {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* Scrollable Accordion Container with Visible Cyan Scrollbar */
+.layer-menu-scrollable-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 52vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.5) rgba(15, 23, 42, 0.6);
+}
+
+.layer-menu-scrollable-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layer-menu-scrollable-body::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.layer-menu-scrollable-body::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.5);
+  border-radius: 4px;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.layer-menu-scrollable-body::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan-400);
+}
+
 /* Layer Menu Accordion System */
 .layer-accordion-item {
   border: 1px solid var(--border-subtle);
