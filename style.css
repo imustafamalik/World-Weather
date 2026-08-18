@@ -804,140 +804,55 @@ a:hover {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-/* Layer Menu Live Ground Resolution & Scale Telemetry */
-.layer-menu-resolution-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 10px;
-  background: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  margin-bottom: 2px;
-  flex-shrink: 0;
-}
-
-.res-bar-top {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.res-bar-icon {
-  font-size: 13px;
-}
-
-.res-bar-label {
-  color: var(--text-secondary);
-  font-weight: 500;
-  flex: 1;
-}
-
-.res-bar-value {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-  color: var(--cyan-400);
-}
-
-.res-bar-telemetry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 10px;
-}
-
-.res-telemetry-tag {
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 2px 6px;
-  border-radius: var(--radius-pill);
-  font-family: 'Outfit', sans-serif;
-  font-weight: 600;
-}
-
-/* Weather Pinpoint Click Mode Toggle Card */
-.layer-mode-toggle-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.12));
-  border: 1px solid rgba(6, 182, 212, 0.35);
-  border-radius: var(--radius-sm);
-  margin-bottom: 2px;
-  flex-shrink: 0;
-}
-
-.mode-toggle-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mode-icon {
-  font-size: 15px;
-}
-
-.mode-text-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.mode-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.mode-desc {
-  font-size: 9px;
-  color: var(--text-muted);
-}
-
-/* Scrollable Accordion Container with Visible Cyan Scrollbar */
+/* Dedicated Scrollable Container for Sidebar with Visible Scrollbar */
+.gis-sidebar-scrollable-body,
 .layer-menu-scrollable-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
   padding-right: 6px;
   margin-right: -2px;
   scrollbar-width: thin;
   scrollbar-color: var(--cyan-500) rgba(15, 23, 42, 0.6);
 }
 
+.gis-sidebar-scrollable-body::-webkit-scrollbar,
 .layer-menu-scrollable-body::-webkit-scrollbar {
   width: 7px;
 }
 
+.gis-sidebar-scrollable-body::-webkit-scrollbar-track,
 .layer-menu-scrollable-body::-webkit-scrollbar-track {
   background: rgba(15, 23, 42, 0.6);
   border-radius: 4px;
 }
 
+.gis-sidebar-scrollable-body::-webkit-scrollbar-thumb,
 .layer-menu-scrollable-body::-webkit-scrollbar-thumb {
   background: var(--cyan-500);
   border-radius: 4px;
   border: 1px solid rgba(6, 182, 212, 0.3);
 }
 
+.gis-sidebar-scrollable-body::-webkit-scrollbar-thumb:hover,
 .layer-menu-scrollable-body::-webkit-scrollbar-thumb:hover {
   background: var(--cyan-400);
 }
 
-/* Layer Menu Accordion System */
+/* Layer Menu Accordion System with Explicit Non-Collapsing Flex Sizing */
 .layer-accordion-item {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.02);
-  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 100%;
+  margin-bottom: 2px;
   overflow: hidden;
 }
 
@@ -946,8 +861,56 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 9px 10px;
+  min-height: 38px;
+  flex-shrink: 0;
+  padding: 9px 12px;
   background: rgba(255, 255, 255, 0.03);
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.layer-accordion-header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.accordion-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accordion-icon {
+  font-size: 14px;
+}
+
+.accordion-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
+}
+
+.accordion-arrow {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.layer-accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.layer-accordion-content.hidden {
+  display: none !important;
+}
   border: none;
   color: var(--text-primary);
   font-size: 11.5px;
