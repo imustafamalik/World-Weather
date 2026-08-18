@@ -24,9 +24,83 @@
     recent: 'weatherExplorerRecent'
   };
 
-  // Map Tile Layer Providers
+  // Map Tile Layer Providers & Satellite Constellations
   const TILE_LAYERS = {
+    esri_sat: {
+      name: 'Esri World Imagery',
+      provider: 'Maxar / DigitalGlobe · Optical Multispectral',
+      resolution: '0.3–1 m (Sub-Meter)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics, GIS User Community'
+      }
+    },
+    google_sat: {
+      name: 'Google High-Res Satellite',
+      provider: 'GeoEye / Maxar · Optical',
+      resolution: '0.5–1 m (Sub-Meter)',
+      url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+      options: {
+        maxZoom: 20,
+        attribution: '&copy; Google'
+      }
+    },
+    google_hybrid: {
+      name: 'Google Hybrid Satellite',
+      provider: 'Google Satellite + Map Reference Labels',
+      resolution: '0.5–1 m (Sub-Meter)',
+      url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+      options: {
+        maxZoom: 20,
+        attribution: '&copy; Google'
+      }
+    },
+    esri_clarity: {
+      name: 'Esri Clarity (Cloudless)',
+      provider: 'Esri Archival High-Resolution Clear Imagery',
+      resolution: '0.5–1 m (Archival Clear)',
+      url: 'https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri Clarity &mdash; Maxar, Earthstar'
+      }
+    },
+    esri_labels: {
+      name: 'Esri Satellite + Labels',
+      provider: 'Esri World Imagery + Boundary & Place Reference',
+      resolution: '0.3–1 m (Hybrid Reference)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar'
+      },
+      hasLabels: true
+    },
+    nasa_night: {
+      name: 'NASA Earth at Night',
+      provider: 'NASA Suomi NPP / VIIRS Day-Night Band (City Lights)',
+      resolution: '750 m (Global VIIRS)',
+      url: 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg',
+      options: {
+        maxZoom: 8,
+        attribution: 'Imagery &copy; NASA Earthdata / GIBS VIIRS'
+      }
+    },
+    opentopo: {
+      name: 'OpenTopoMap',
+      provider: 'SRTM Elevation + OpenStreetMap Contours',
+      resolution: 'Vector / 10–20 m Topographic',
+      url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+      options: {
+        maxZoom: 17,
+        attribution: 'Map data &copy; <a href="https://openstreetmap.org">OSM</a>, SRTM | Style &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+      }
+    },
     voyager: {
+      name: 'Standard Voyager',
+      provider: 'CARTO + OpenStreetMap Vector',
+      resolution: 'Vector Street Map',
       url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       options: {
         maxZoom: 19,
@@ -35,6 +109,9 @@
       }
     },
     dark: {
+      name: 'Dark Night Mode',
+      provider: 'CARTO Dark Matter + OpenStreetMap',
+      resolution: 'Vector Dark Theme',
       url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
       options: {
         maxZoom: 19,
@@ -42,21 +119,30 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }
     },
-    satellite: {
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 18,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      }
-    },
     osm: {
+      name: 'OpenStreetMap Standard',
+      provider: 'OpenStreetMap Community Contributors',
+      resolution: 'Vector Standard OSM',
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       options: {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }
+    },
+    // Backwards compatibility alias
+    satellite: {
+      name: 'Esri World Imagery',
+      provider: 'Maxar / DigitalGlobe · Optical Multispectral',
+      resolution: '0.3–1 m (Sub-Meter)',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Maxar, Earthstar Geographics'
+      }
     }
   };
+
+  const OVERLAY_TILE_URL = 'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
 
   // -------------------------------------------------------------------
   // 2. APPLICATION STATE
@@ -64,6 +150,8 @@
   const state = {
     map: null,
     activeTileLayer: null,
+    overlayTileLayer: null,
+    showOverlayLabels: false,
     currentMarker: null,
     selectedLocation: null,   // { lat, lng, name, subname, country, countryCode, flag }
     currentWeatherData: null,
@@ -75,7 +163,7 @@
       tempUnit: 'c',          // 'c' | 'f'
       windUnit: 'kmh',        // 'kmh' | 'mph' | 'ms' | 'knots'
       elevUnit: 'm',          // 'm' | 'ft'
-      mapLayer: 'voyager',    // 'voyager' | 'dark' | 'satellite' | 'osm'
+      mapLayer: 'voyager',    // 'esri_sat' | 'google_sat' | 'google_hybrid' | 'voyager' | etc.
       animations: true,
       autoRefresh: true
     },
@@ -214,7 +302,7 @@
   }
 
   // -------------------------------------------------------------------
-  // 5. MAP INITIALIZATION & LAYER SWITCHING
+  // 5. MAP INITIALIZATION & SATELLITE LAYER ENGINE
   // -------------------------------------------------------------------
   function initMap() {
     const initialCoords = [20, 0];
@@ -224,12 +312,15 @@
       center: initialCoords,
       zoom: initialZoom,
       minZoom: 2,
-      maxZoom: 18,
+      maxZoom: 20,
       zoomControl: false,
       worldCopyJump: true
     });
 
-    setMapLayer(state.settings.mapLayer || 'voyager');
+    // Set initial map layer
+    const initialLayer = state.settings.mapLayer && TILE_LAYERS[state.settings.mapLayer] ? 
+      state.settings.mapLayer : 'voyager';
+    setMapLayer(initialLayer);
 
     // Map Click Handler
     state.map.on('click', (e) => {
@@ -237,6 +328,14 @@
       const normalizedLng = ((lng + 180) % 360 + 360) % 360 - 180;
       selectLocation(lat, normalizedLng, { panTo: true, zoom: state.map.getZoom() < 6 ? 6 : null });
     });
+
+    // Map Move/Zoom Handlers for Live GSD Resolution Tracking
+    state.map.on('zoom move', () => {
+      updateLiveGSDDisplay();
+    });
+
+    // Initial GSD calculation
+    updateLiveGSDDisplay();
 
     // Custom Map Control Buttons
     document.getElementById('ctrl-zoom-in')?.addEventListener('click', () => state.map.zoomIn());
@@ -251,14 +350,16 @@
       selectLocation(center.lat, normalizedLng, { panTo: false });
     });
 
-    // Layer Switcher Menu
+    // Layer Switcher Dropdown Menu
     const layerToggleBtn = document.getElementById('ctrl-layer-toggle');
     const layerMenu = document.getElementById('layer-menu');
     layerToggleBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       layerMenu?.classList.toggle('hidden');
+      updateLiveGSDDisplay();
     });
 
+    // Layer options click listener
     document.querySelectorAll('.layer-option').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const layerKey = btn.dataset.layer;
@@ -268,10 +369,32 @@
           saveSettings();
           applySettingsToUI();
           layerMenu?.classList.add('hidden');
+          showToast(`Switched map layer: ${TILE_LAYERS[layerKey].name}`);
         }
       });
     });
 
+    // Overlay Place Names & Borders checkbox
+    const overlayCheck = document.getElementById('overlay-labels-check');
+    overlayCheck?.addEventListener('change', (e) => {
+      toggleOverlayLabels(e.target.checked);
+    });
+
+    // Quick Zoom to 1-Meter Detail Button (in layer menu & in info panel)
+    document.getElementById('btn-zoom-1m')?.addEventListener('click', () => {
+      layerMenu?.classList.add('hidden');
+      zoomTo1Meter();
+    });
+    document.getElementById('btn-zoom-to-1m')?.addEventListener('click', () => {
+      zoomTo1Meter();
+    });
+
+    // Satellite Overlay Toggle Button (in info panel)
+    document.getElementById('btn-toggle-sat-overlay')?.addEventListener('click', () => {
+      toggleOverlayLabels(!state.showOverlayLabels);
+    });
+
+    // Close layer menu when clicking outside
     document.addEventListener('click', (e) => {
       if (!layerMenu?.contains(e.target) && !layerToggleBtn?.contains(e.target)) {
         layerMenu?.classList.add('hidden');
@@ -284,8 +407,16 @@
     if (state.activeTileLayer) {
       state.map.removeLayer(state.activeTileLayer);
     }
+    
     state.activeTileLayer = L.tileLayer(config.url, config.options).addTo(state.map);
+    state.settings.mapLayer = layerKey;
 
+    // If layer specifically has built-in labels or user enabled overlay, ensure overlay state
+    if (config.hasLabels) {
+      toggleOverlayLabels(true);
+    }
+
+    // Update active highlight in layer dropdown
     document.querySelectorAll('.layer-option').forEach(btn => {
       if (btn.dataset.layer === layerKey) {
         btn.classList.add('active');
@@ -293,6 +424,143 @@
         btn.classList.remove('active');
       }
     });
+
+    // Update Satellite Intelligence Card
+    updateSatelliteIntelligenceUI(layerKey);
+    updateLiveGSDDisplay();
+  }
+
+  function toggleOverlayLabels(enable) {
+    state.showOverlayLabels = enable !== undefined ? enable : !state.showOverlayLabels;
+    
+    if (state.showOverlayLabels) {
+      if (!state.overlayTileLayer && state.map) {
+        state.overlayTileLayer = L.tileLayer(OVERLAY_TILE_URL, {
+          maxZoom: 19,
+          zIndex: 650,
+          opacity: 0.9
+        }).addTo(state.map);
+      }
+    } else {
+      if (state.overlayTileLayer && state.map) {
+        state.map.removeLayer(state.overlayTileLayer);
+        state.overlayTileLayer = null;
+      }
+    }
+
+    const checkEl = document.getElementById('overlay-labels-check');
+    if (checkEl) checkEl.checked = state.showOverlayLabels;
+
+    const satToggleBtn = document.getElementById('btn-toggle-sat-overlay');
+    if (satToggleBtn) {
+      satToggleBtn.textContent = state.showOverlayLabels ? '🏷️ Labels ON' : 'Labels Off';
+      satToggleBtn.classList.toggle('active', state.showOverlayLabels);
+    }
+  }
+
+  function calculateGSD(lat, zoom) {
+    if (lat === null || lat === undefined || isNaN(lat)) lat = 0;
+    const clampedZoom = Math.max(0, zoom || 2);
+    const rad = (lat * Math.PI) / 180;
+    // 156543.03392 is standard Web Mercator equatorial ground resolution at zoom 0
+    return (156543.03392 * Math.cos(rad)) / Math.pow(2, clampedZoom);
+  }
+
+  function updateLiveGSDDisplay() {
+    if (!state.map) return;
+    const center = state.map.getCenter();
+    const zoom = state.map.getZoom();
+    const gsd = calculateGSD(center.lat, zoom);
+    
+    let gsdFormatted = '';
+    if (gsd < 1) {
+      gsdFormatted = `${(gsd * 100).toFixed(0)} cm/px`;
+    } else if (gsd < 10) {
+      gsdFormatted = `${gsd.toFixed(2)} m/px`;
+    } else if (gsd < 1000) {
+      gsdFormatted = `${gsd.toFixed(1)} m/px`;
+    } else {
+      gsdFormatted = `${(gsd / 1000).toFixed(1)} km/px`;
+    }
+
+    const liveGsdEl = document.getElementById('live-gsd-display');
+    if (liveGsdEl) {
+      liveGsdEl.textContent = `${gsdFormatted} (Z${zoom})`;
+    }
+
+    // Update Satellite Intelligence card if visible
+    const satGsdValEl = document.getElementById('sat-gsd-value');
+    if (satGsdValEl) {
+      satGsdValEl.textContent = `${gsdFormatted} / pixel`;
+    }
+
+    const satGsdBar = document.getElementById('sat-gsd-bar');
+    if (satGsdBar) {
+      // Scale from 0.3m (100%) to 500m (10%)
+      const percentage = Math.max(10, Math.min(100, 100 - (Math.log10(Math.max(0.3, gsd)) / Math.log10(500)) * 90));
+      satGsdBar.style.width = `${percentage}%`;
+    }
+
+    const satChipZoom = document.getElementById('sat-chip-zoom');
+    if (satChipZoom) {
+      satChipZoom.textContent = `Zoom ${zoom}`;
+    }
+
+    const gsdBadge = document.getElementById('sat-gsd-badge');
+    if (gsdBadge) {
+      if (gsd <= 1.0) {
+        gsdBadge.textContent = 'Sub-Meter GSD (≤ 1m)';
+        gsdBadge.className = 'sat-badge sub-meter';
+      } else if (gsd <= 5.0) {
+        gsdBadge.textContent = 'High-Res Detail';
+        gsdBadge.className = 'sat-badge';
+      } else {
+        gsdBadge.textContent = 'Regional Overview';
+        gsdBadge.className = 'sat-badge';
+      }
+    }
+  }
+
+  function zoomTo1Meter() {
+    if (!state.map) return;
+    const currentLayer = state.settings.mapLayer;
+    // If on vector map, switch to sub-meter satellite
+    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('hybrid')) {
+      setMapLayer('esri_sat');
+    }
+    const center = state.map.getCenter();
+    const lat = center.lat;
+    const rad = (lat * Math.PI) / 180;
+    // Calculate required zoom for GSD <= 1.0 meter
+    const reqZoom = Math.ceil(Math.log2(Math.max(1, 156543.03392 * Math.cos(rad))));
+    const targetZoom = Math.min(19, Math.max(17, reqZoom));
+    
+    state.map.flyTo(center, targetZoom, {
+      duration: state.settings.animations ? 1.2 : 0
+    });
+    showToast(`Zoomed to 1-meter detail (Zoom ${targetZoom}).`);
+  }
+
+  function updateSatelliteIntelligenceUI(layerKey) {
+    const layer = TILE_LAYERS[layerKey || state.settings.mapLayer] || TILE_LAYERS.esri_sat;
+    
+    const sensorNameEl = document.getElementById('sat-sensor-name');
+    const sensorProviderEl = document.getElementById('sat-sensor-provider');
+    const categoryTagEl = document.getElementById('sat-resolution-category');
+
+    if (sensorNameEl) sensorNameEl.textContent = layer.name;
+    if (sensorProviderEl) sensorProviderEl.textContent = layer.provider;
+    if (categoryTagEl) {
+      if (layerKey?.includes('sat') || layerKey?.includes('clarity') || layerKey?.includes('hybrid')) {
+        categoryTagEl.textContent = 'Sub-Meter (≤ 1m)';
+      } else if (layerKey === 'nasa_night') {
+        categoryTagEl.textContent = 'Night VIIRS (750m)';
+      } else if (layerKey === 'opentopo') {
+        categoryTagEl.textContent = 'Topographic (10m)';
+      } else {
+        categoryTagEl.textContent = 'Vector Cartography';
+      }
+    }
   }
 
   function togglePrecisionMode() {
@@ -478,6 +746,8 @@
     updateDistanceUI();
     updateFavoriteButtonState();
     addToRecentLocations(state.selectedLocation);
+    try { updateSatelliteIntelligenceUI(); } catch (e) {}
+    try { updateLiveGSDDisplay(); } catch (e) {}
 
     // Update marker popup
     if (state.currentWeatherData && state.currentWeatherData.current) {

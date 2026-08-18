@@ -625,33 +625,82 @@ a:hover {
 /* Layer Menu Dropdown */
 .layer-menu {
   position: absolute;
-  left: calc(100% + 12px);
+  left: calc(100% + 14px);
   bottom: 0;
-  width: 195px;
+  width: 275px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   background: var(--bg-panel-solid);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-highlight);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-dropdown);
-  padding: 6px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   z-index: 100;
 }
 
+/* Layer Menu Live Ground Resolution Bar */
+.layer-menu-resolution-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.res-bar-icon {
+  font-size: 13px;
+}
+
+.res-bar-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex: 1;
+}
+
+.res-bar-value {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--cyan-400);
+}
+
+/* Layer Category Header */
+.layer-category-header {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 6px 8px 2px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+}
+
+.layer-category-header:first-of-type {
+  border-top: none;
+  margin-top: 0;
+}
+
 .layer-option {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
   text-align: left;
   transition: all var(--transition-fast);
+  width: 100%;
 }
 
 .layer-option:hover {
@@ -670,12 +719,272 @@ a:hover {
   height: 8px;
   border-radius: 50%;
   background: var(--text-muted);
+  flex-shrink: 0;
 }
 
+.layer-indicator.sat-indicator { background: var(--cyan-400); }
+.layer-indicator.google-indicator { background: #34d399; }
+.layer-indicator.clarity-indicator { background: #60a5fa; }
+.layer-indicator.labels-indicator { background: #a78bfa; }
+.layer-indicator.nasa-indicator { background: var(--amber-400); }
+.layer-indicator.topo-indicator { background: #f472b6; }
+.layer-indicator.dark-indicator { background: #64748b; }
+.layer-indicator.osm-indicator { background: #38bdf8; }
+
 .layer-option.active .layer-indicator {
-  background: var(--cyan-400);
-  box-shadow: 0 0 8px var(--cyan-400);
+  box-shadow: 0 0 8px currentColor;
 }
+
+.layer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.layer-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.layer-res-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.layer-option.active .layer-res-tag {
+  color: var(--cyan-400);
+}
+
+/* Layer Menu Overlay Section */
+.layer-overlay-section {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+}
+
+.layer-overlay-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.layer-overlay-toggle input[type="checkbox"] {
+  accent-color: var(--cyan-500);
+  cursor: pointer;
+}
+
+/* Layer Menu Zoom 1m Button */
+.layer-zoom-1m-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  margin-top: 4px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25));
+  border: 1px solid var(--cyan-500);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.layer-zoom-1m-btn:hover {
+  background: var(--cyan-500);
+  color: var(--text-inverse);
+}
+
+/* ----------------- Satellite Intelligence Card ----------------- */
+.satellite-intel-card {
+  background: linear-gradient(145deg, rgba(14, 23, 42, 0.8), rgba(22, 33, 62, 0.6));
+  border-color: rgba(6, 182, 212, 0.25);
+}
+
+.sat-sensor-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sat-sensor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sat-sensor-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sat-sensor-provider {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.sat-badge-group {
+  display: flex;
+  gap: 6px;
+}
+
+.sat-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--cyan-400);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+}
+
+.sat-badge.sub-meter {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--emerald-400);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+/* GSD Resolution Display Bar */
+.sat-gsd-display {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gsd-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gsd-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.gsd-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan-400);
+}
+
+.gsd-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.gsd-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #06b6d4 50%, #f59e0b 100%);
+  border-radius: 3px;
+  transition: width var(--transition-normal);
+}
+
+.gsd-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.sat-capability-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sat-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.sat-chip.optical {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: var(--blue-400);
+}
+
+.sat-chip.multispectral {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: var(--purple-400);
+}
+
+.sat-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sat-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.sat-action-btn.primary {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(59, 130, 246, 0.3));
+  border: 1px solid var(--cyan-500);
+  color: var(--text-primary);
+}
+
+.sat-action-btn.primary:hover {
+  background: var(--cyan-500);
+  color: var(--text-inverse);
+}
+
+.sat-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.sat-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
 
 /* ----------------- Welcome / Empty State Overlay ----------------- */
 .welcome-card {
