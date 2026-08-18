@@ -334,7 +334,7 @@
       tempUnit: 'c',          // 'c' | 'f'
       windUnit: 'kmh',        // 'kmh' | 'mph' | 'ms' | 'knots'
       elevUnit: 'm',          // 'm' | 'ft'
-      mapLayer: 'voyager',    // Default: Vector World Map with Borders
+      mapLayer: 'osm',        // Default: OpenStreetMap Standard Street Map
       animations: true,
       autoRefresh: true
     },
@@ -509,9 +509,9 @@
       worldCopyJump: true
     });
 
-    // Set initial map layer (defaults to Voyager clean vector world map with borders)
+    // Set initial map layer (defaults to OpenStreetMap Standard Street Map)
     const initialLayer = state.settings.mapLayer && TILE_LAYERS[state.settings.mapLayer] ? 
-      state.settings.mapLayer : 'voyager';
+      state.settings.mapLayer : 'osm';
     setMapLayer(initialLayer);
 
     // Map Click Handler (Respects Weather Click Mode Toggle)
@@ -543,13 +543,20 @@
       selectLocation(center.lat, normalizedLng, { panTo: false });
     });
 
-    // Layer Switcher Dropdown Menu
+    // Layer Switcher Fixed Side Panel Toggle & Close
     const layerToggleBtn = document.getElementById('ctrl-layer-toggle');
     const layerMenu = document.getElementById('layer-menu');
+    const layerCloseBtn = document.getElementById('btn-close-layer-menu');
+
     layerToggleBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       layerMenu?.classList.toggle('hidden');
       updateLiveGSDDisplay();
+    });
+
+    layerCloseBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      layerMenu?.classList.add('hidden');
     });
 
     // Layer options click listener

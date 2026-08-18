@@ -147,8 +147,19 @@
         <span class="sat-btn-label">Layers</span>
       </button>
 
-      <!-- GIS Multi-Source Layer Manager with Weather Mode Toggle & Real-Time Streams -->
+      <!-- Fixed Side GIS Multi-Source Layer Manager -->
       <div id="layer-menu" class="layer-menu hidden" role="menu" aria-label="GIS Layer Manager">
+        <!-- Panel Header with Title & Close Button -->
+        <div class="layer-menu-top-header">
+          <div class="layer-menu-title-wrap">
+            <span class="layer-menu-header-icon">🗺️</span>
+            <span class="layer-menu-header-title">GIS Layer Manager</span>
+          </div>
+          <button id="btn-close-layer-menu" class="layer-menu-close-btn" type="button" title="Close Layer Panel" aria-label="Close Layer Panel">
+            ✕
+          </button>
+        </div>
+
         <!-- Live GSD Resolution & Scale Telemetry Header -->
         <div class="layer-menu-resolution-bar">
           <div class="res-bar-top">
@@ -179,31 +190,31 @@
 
         <!-- Scrollable Accordion Container with Sleek Custom Scrollbar -->
         <div class="layer-menu-scrollable-body">
-          <!-- Accordion Section 1: Basemaps & Vector World (Default: Vector with Borders) -->
+          <!-- Accordion Section 1: Basemaps & Vector World (Default: OpenStreetMap Standard Street Map) -->
           <div class="layer-accordion-item open" data-accordion="basemaps">
             <button class="layer-accordion-header" type="button">
               <div class="accordion-title-wrap">
                 <span class="accordion-icon">🗺️</span>
-                <span class="accordion-title">Basemaps &amp; Vector Maps</span>
+                <span class="accordion-title">Basemaps &amp; Street Maps</span>
               </div>
               <span class="accordion-arrow">▼</span>
             </button>
             <div class="layer-accordion-content">
-              <div class="layer-category-header">🗺️ Vector World Maps with Borders</div>
+              <div class="layer-category-header">🗺️ Vector &amp; Street World Maps</div>
 
-              <button class="layer-option active" data-layer="voyager" role="menuitem">
-                <span class="layer-indicator" style="background:#38bdf8;"></span>
+              <button class="layer-option active" data-layer="osm" role="menuitem">
+                <span class="layer-indicator osm-indicator"></span>
                 <span class="layer-info">
-                  <span class="layer-text">Voyager Vector Map (Default)</span>
-                  <span class="layer-res-tag">CartoDB · Borders, Terrain &amp; Cities</span>
+                  <span class="layer-text">OpenStreetMap (Default)</span>
+                  <span class="layer-res-tag">OSM · Complete Global Street Map</span>
                 </span>
               </button>
 
-              <button class="layer-option" data-layer="osm" role="menuitem">
-                <span class="layer-indicator osm-indicator"></span>
+              <button class="layer-option" data-layer="voyager" role="menuitem">
+                <span class="layer-indicator" style="background:#38bdf8;"></span>
                 <span class="layer-info">
-                  <span class="layer-text">OpenStreetMap Standard</span>
-                  <span class="layer-res-tag">OSM · Complete World Cartography</span>
+                  <span class="layer-text">Voyager Vector Map</span>
+                  <span class="layer-res-tag">CartoDB · Borders, Terrain &amp; Cities</span>
                 </span>
               </button>
 
