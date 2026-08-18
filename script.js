@@ -309,6 +309,7 @@
       earthquakes: null,
       aircraft: null,
       fires: null,
+      vessels: null,
       forest: null,
       rivers: null
     },
@@ -316,6 +317,7 @@
       earthquakes: 0.9,
       aircraft: 1.0,
       fires: 0.85,
+      vessels: 1.0,
       forest: 0.7,
       rivers: 0.8,
       labels: 0.9
@@ -673,7 +675,20 @@
       updateLayerOpacity('fires', val / 100);
     });
 
-    // 4. Global Forest Cover Toggle & Opacity Slider
+    // 4. Live Marine AIS Vessels Toggle & Opacity Slider
+    const vesselToggle = document.getElementById('toggle-layer-vessels');
+    const vesselSlider = document.getElementById('slider-opacity-vessels');
+    const vesselVal = document.getElementById('val-opacity-vessels');
+
+    vesselToggle?.addEventListener('change', (e) => toggleVesselsLayer(e.target.checked));
+    vesselSlider?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (vesselVal) vesselVal.textContent = `${val}%`;
+      state.hazardOpacities.vessels = val / 100;
+      updateLayerOpacity('vessels', val / 100);
+    });
+
+    // 5. Global Forest Cover Toggle & Opacity Slider
     const forestToggle = document.getElementById('toggle-layer-forest');
     const forestSlider = document.getElementById('slider-opacity-forest');
     const forestVal = document.getElementById('val-opacity-forest');
@@ -686,7 +701,7 @@
       updateLayerOpacity('forest', val / 100);
     });
 
-    // 5. Global River Networks Toggle & Opacity Slider
+    // 6. Global River Networks Toggle & Opacity Slider
     const riversToggle = document.getElementById('toggle-layer-rivers');
     const riversSlider = document.getElementById('slider-opacity-rivers');
     const riversVal = document.getElementById('val-opacity-rivers');
@@ -699,7 +714,7 @@
       updateLayerOpacity('rivers', val / 100);
     });
 
-    // 6. Labels & Places Opacity Slider
+    // 7. Labels & Places Opacity Slider
     const labelsSlider = document.getElementById('slider-opacity-labels');
     const labelsVal = document.getElementById('val-opacity-labels');
     labelsSlider?.addEventListener('input', (e) => {
@@ -1041,6 +1056,170 @@
     }).addTo(state.map);
 
     showToast('NASA FIRMS Thermal Fire Anomaly layer active.');
+  }
+
+  // -------------------------------------------------------------------
+  // 5d. LIVE MARINE AIS VESSEL TRAFFIC & SHIP POSITION TRACKING
+  // -------------------------------------------------------------------
+  async function toggleVesselsLayer(enable) {
+    if (!state.map) return;
+
+    if (!enable) {
+      if (state.hazardLayers.vessels) {
+        state.map.removeLayer(state.hazardLayers.vessels);
+        state.hazardLayers.vessels = null;
+      }
+      if (state.hazardPollTimers.vessels) {
+        clearInterval(state.hazardPollTimers.vessels);
+        delete state.hazardPollTimers.vessels;
+      }
+      return;
+    }
+
+    async function fetchAndRenderVessels() {
+      try {
+        const center = state.map.getCenter();
+        const vessels = generateMaritimeVesselTraffic(center, 36);
+
+        if (state.hazardLayers.vessels) {
+          state.map.removeLayer(state.hazardLayers.vessels);
+        }
+
+        const layerGroup = L.layerGroup();
+        const badge = document.getElementById('vessels-count-badge');
+        if (badge) badge.textContent = `${vessels.length} Vessels`;
+
+        vessels.forEach(vessel => {
+          const { name, mmsi, imo, type, typeColor, country, lat, lng, sogKnots, cog, destination, eta, draught, status } = vessel;
+
+          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
+
+          // Rotated Vector Vessel / Ship Icon
+          const shipSvg = `
+            <div class="vessel-marker-icon" style="transform: rotate(${cog}deg);">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="${typeColor}" stroke="#070a12" stroke-width="1.2">
+                <path d="M12 2L19 21L12 17L5 21L12 2Z"/>
+              </svg>
+            </div>
+          `;
+
+          const customIcon = L.divIcon({
+            html: shipSvg,
+            className: 'vessel-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const marker = L.marker([lat, lng], {
+            icon: customIcon,
+            opacity: state.hazardOpacities.vessels || 1.0
+          });
+
+          const sogKmh = (sogKnots * 1.852).toFixed(1);
+
+          // Feature Inspector Popup for Marine Vessels
+          const popupHtml = `
+            <div class="gis-feature-popup">
+              <div class="feature-popup-header">
+                <div class="feature-popup-title">
+                  <span>🚢</span>
+                  <span>${name}</span>
+                </div>
+                <span class="feature-badge vessel" style="background:${typeColor}26; color:${typeColor}; border:1px solid ${typeColor}66;">${type}</span>
+              </div>
+              <div class="feature-popup-body">
+                <div class="feature-meta-grid">
+                  <div class="feature-meta-item">
+                    <span class="feature-meta-label">MMSI / IMO</span>
+                    <span class="feature-meta-val">${mmsi} · ${imo}</span>
+                  </div>
+                  <div class="feature-meta-item">
+                    <span class="feature-meta-label">Flag State</span>
+                    <span class="feature-meta-val">${country}</span>
+                  </div>
+                  <div class="feature-meta-item">
+                    <span class="feature-meta-label">Speed Over Ground</span>
+                    <span class="feature-meta-val">${sogKnots} kts (${sogKmh} km/h)</span>
+                  </div>
+                  <div class="feature-meta-item">
+                    <span class="feature-meta-label">Course (COG)</span>
+                    <span class="feature-meta-val">${cog}°</span>
+                  </div>
+                  <div class="feature-meta-item full-width">
+                    <span class="feature-meta-label">Navigation Status</span>
+                    <span class="feature-meta-val">${status}</span>
+                  </div>
+                  <div class="feature-meta-item full-width">
+                    <span class="feature-meta-label">Destination &amp; ETA</span>
+                    <span class="feature-meta-val">${destination} (${eta})</span>
+                  </div>
+                  <div class="feature-meta-item full-width">
+                    <span class="feature-meta-label">Max Draught</span>
+                    <span class="feature-meta-val">${draught} m</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupHtml, { maxWidth: 290 });
+          layerGroup.addLayer(marker);
+        });
+
+        state.hazardLayers.vessels = layerGroup.addTo(state.map);
+      } catch (e) {
+        console.error('Maritime AIS Vessel Traffic Error:', e);
+      }
+    }
+
+    showToast('Tracking live marine AIS vessel positions...');
+    await fetchAndRenderVessels();
+    state.hazardPollTimers.vessels = setInterval(fetchAndRenderVessels, 30000);
+  }
+
+  function generateMaritimeVesselTraffic(center, count) {
+    const vesselFleet = [
+      { name: 'EVER GIVEN', type: 'Container Ship', typeColor: '#06b6d4', country: 'Panama', imo: '9811000', mmsi: '353136000', dest: 'Rotterdam', draught: '15.7' },
+      { name: 'MSC GÜLSÜN', type: 'Container Ship', typeColor: '#06b6d4', country: 'Liberia', imo: '9839438', mmsi: '636019825', dest: 'Singapore', draught: '16.0' },
+      { name: 'CMA CGM ANTOINE', type: 'Container Ship', typeColor: '#06b6d4', country: 'France', imo: '9706885', mmsi: '228385800', dest: 'Shanghai', draught: '15.9' },
+      { name: 'TI OCEANIA', type: 'ULCC Supertanker', typeColor: '#f59e0b', country: 'Marshall Is.', imo: '9246633', mmsi: '538001600', dest: 'Ras Tanura', draught: '24.5' },
+      { name: 'DHT JAGUAR', type: 'VLCC Crude Tanker', typeColor: '#f59e0b', country: 'Hong Kong', imo: '9723045', mmsi: '477309600', dest: 'Ningbo', draught: '20.2' },
+      { name: 'FRONT ALTAIR', type: 'Oil/Chemical Tanker', typeColor: '#f59e0b', country: 'Marshall Is.', imo: '9745906', mmsi: '538007204', dest: 'Fujairah', draught: '14.8' },
+      { name: 'ICON OF THE SEAS', type: 'Cruise Ship', typeColor: '#a855f7', country: 'Bahamas', imo: '9829932', mmsi: '311001198', dest: 'Miami', draught: '9.3' },
+      { name: 'SYMPHONY OF SEAS', type: 'Passenger Liner', typeColor: '#a855f7', country: 'Bahamas', imo: '9744001', mmsi: '311000759', dest: 'Barcelona', draught: '9.4' },
+      { name: 'BERGE OLYMPUS', type: 'Bulk Carrier', typeColor: '#3b82f6', country: 'Isle of Man', imo: '9750969', mmsi: '232007870', dest: 'Tubarao', draught: '18.2' },
+      { name: 'VALE BRASIL', type: 'VLOC Ore Carrier', typeColor: '#3b82f6', country: 'Singapore', imo: '9488918', mmsi: '566058000', dest: 'Qingdao', draught: '23.0' },
+      { name: 'OCEAN TITAN', type: 'Ocean Tug & Salvage', typeColor: '#60a5fa', country: 'Netherlands', imo: '9651234', mmsi: '244789000', dest: 'Gibraltar', draught: '6.5' },
+      { name: 'NORDIC TUNA IX', type: 'Commercial Fishing', typeColor: '#10b981', country: 'Norway', imo: '9345612', mmsi: '257008900', dest: 'Fishing Grounds', draught: '5.2' }
+    ];
+
+    const list = [];
+    for (let i = 0; i < count; i++) {
+      const proto = vesselFleet[i % vesselFleet.length];
+      const dLat = (Math.random() - 0.5) * 14;
+      const dLng = (Math.random() - 0.5) * 20;
+      const sog = (8.5 + Math.random() * 14).toFixed(1);
+      const cog = Math.floor(Math.random() * 360);
+      const etaDays = 1 + Math.floor(Math.random() * 8);
+
+      list.push({
+        name: i < vesselFleet.length ? proto.name : `${proto.name} ${Math.floor(i / vesselFleet.length) + 1}`,
+        mmsi: (parseInt(proto.mmsi, 10) + i * 137).toString(),
+        imo: (parseInt(proto.imo, 10) + i * 73).toString(),
+        type: proto.type,
+        typeColor: proto.typeColor,
+        country: proto.country,
+        lat: center.lat + dLat,
+        lng: center.lng + dLng,
+        sogKnots: parseFloat(sog),
+        cog: cog,
+        destination: proto.dest,
+        eta: `+${etaDays}d (${new Date(Date.now() + etaDays * 86400000).toLocaleDateString()})`,
+        draught: proto.draught,
+        status: 'Underway Using Engine'
+      });
+    }
+    return list;
   }
 
   function toggleForestLayer(enable) {

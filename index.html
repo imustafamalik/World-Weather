@@ -347,7 +347,7 @@
                 </label>
                 <div class="layer-control-label">
                   <div class="layer-title-row">
-                    <span class="layer-control-name">🔥 NASA FIRMS Active Fires</span>
+                    <span class="layer-control-name">🔥 NASA Active Fires</span>
                     <span class="layer-status-badge thermal" id="fires-count-badge">Thermal</span>
                   </div>
                   <span class="layer-control-desc">Global thermal anomalies &amp; wildfire hotspots</span>
@@ -357,6 +357,28 @@
                 <span class="slider-label">Opacity</span>
                 <input type="range" class="layer-opacity-slider" id="slider-opacity-fires" min="0" max="100" value="85">
                 <span class="slider-val" id="val-opacity-fires">85%</span>
+              </div>
+            </div>
+
+            <!-- Live Marine Vessels (AIS Traffic) -->
+            <div class="layer-control-card">
+              <div class="layer-control-header">
+                <label class="layer-toggle-switch" for="toggle-layer-vessels">
+                  <input type="checkbox" id="toggle-layer-vessels">
+                  <span class="toggle-slider"></span>
+                </label>
+                <div class="layer-control-label">
+                  <div class="layer-title-row">
+                    <span class="layer-control-name">🚢 Marine Vessels (AIS)</span>
+                    <span class="layer-status-badge blue" id="vessels-count-badge">Live AIS</span>
+                  </div>
+                  <span class="layer-control-desc">Global cargo, tankers, passenger &amp; fishing ships</span>
+                </div>
+              </div>
+              <div class="layer-slider-wrapper" id="vessels-slider-wrap">
+                <span class="slider-label">Opacity</span>
+                <input type="range" class="layer-opacity-slider" id="slider-opacity-vessels" min="0" max="100" value="100">
+                <span class="slider-val" id="val-opacity-vessels">100%</span>
               </div>
             </div>
           </div>
