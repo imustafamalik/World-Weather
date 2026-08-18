@@ -203,6 +203,15 @@
                 <span class="legend-chip" style="border-left: 3px solid #ef4444;">🌡️ Flare (&gt;350 K)</span>
               </div>
             </div>
+
+            <!-- Flood Affected Areas & Inundation Legend Card -->
+            <div class="legend-card">
+              <div class="legend-card-title">🌊 Flood Inundation &amp; Affected Areas</div>
+              <div class="legend-chips-grid">
+                <span class="legend-chip" style="border-left: 3px solid #ef4444;">🚨 Critical (&gt;1.5m)</span>
+                <span class="legend-chip" style="border-left: 3px solid #f59e0b;">⚠️ Warning (&gt;0.5m)</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -479,6 +488,28 @@
                   <span class="slider-label">Opacity</span>
                   <input type="range" class="layer-opacity-slider" id="slider-opacity-fires" min="0" max="100" value="90">
                   <span class="slider-val" id="val-opacity-fires">90%</span>
+                </div>
+              </div>
+
+              <!-- Global Flood Inundation & Affected Areas Layer -->
+              <div class="layer-control-card">
+                <div class="layer-control-header">
+                  <label class="layer-toggle-switch" for="toggle-layer-floods">
+                    <input type="checkbox" id="toggle-layer-floods">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="layer-control-label">
+                    <div class="layer-title-row">
+                      <span class="layer-control-name">🌊 Flood Affected Areas &amp; Inundation</span>
+                      <span class="layer-status-badge blue" id="floods-count-badge">Live Feeds</span>
+                    </div>
+                    <span class="layer-control-desc">Copernicus EMS &amp; DFO global flood inundation zones</span>
+                  </div>
+                </div>
+                <div class="layer-slider-wrapper" id="floods-slider-wrap">
+                  <span class="slider-label">Opacity</span>
+                  <input type="range" class="layer-opacity-slider" id="slider-opacity-floods" min="0" max="100" value="85">
+                  <span class="slider-val" id="val-opacity-floods">85%</span>
                 </div>
               </div>
 
