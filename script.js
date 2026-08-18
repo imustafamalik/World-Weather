@@ -665,19 +665,6 @@
       updateLayerOpacity('clouds', val / 100);
     });
 
-    // 3. Thermal Heat Index Toggle & Opacity Slider
-    const heatToggle = document.getElementById('toggle-layer-heat');
-    const heatSlider = document.getElementById('slider-opacity-heat');
-    const heatVal = document.getElementById('val-opacity-heat');
-
-    heatToggle?.addEventListener('change', (e) => toggleHeatLayer(e.target.checked));
-    heatSlider?.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (heatVal) heatVal.textContent = `${val}%`;
-      state.hazardOpacities.heat = val / 100;
-      updateLayerOpacity('heat', val / 100);
-    });
-
     // 4. USGS Earthquakes Toggle & Opacity Slider
     const eqToggle = document.getElementById('toggle-layer-earthquakes');
     const eqSlider = document.getElementById('slider-opacity-earthquakes');
@@ -857,41 +844,6 @@
     }).addTo(state.map);
 
     showToast('Global Cloud Satellite Overlay active.');
-  }
-
-  function toggleHeatLayer(enable) {
-    if (!state.map) return;
-
-    if (!enable) {
-      if (state.hazardLayers.heat) {
-        state.map.removeLayer(state.hazardLayers.heat);
-        state.hazardLayers.heat = null;
-      }
-      return;
-    }
-
-    try {
-      showToast('Loading Global Surface Temperature & Thermal Gradient...');
-      // NASA MERRA-2 Global Continuous Reanalysis 2m Air Temperature Layer
-      const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MERRA2_2m_Air_Temperature_Monthly/default/default/GoogleMapsCompatible_Level6/{z}/{x}/{y}.png';
-      const opacity = state.hazardOpacities.heat || 0.65;
-
-      if (state.hazardLayers.heat) {
-        state.map.removeLayer(state.hazardLayers.heat);
-      }
-
-      state.hazardLayers.heat = L.tileLayer(heatUrl, {
-        maxNativeZoom: 6,
-        maxZoom: 20,
-        opacity: opacity,
-        zIndex: 650,
-        attribution: '&copy; NASA GIBS MERRA-2 Global Temperature Reanalysis'
-      }).addTo(state.map);
-
-      showToast('Global Surface Temperature & Heat Map active.');
-    } catch (e) {
-      console.error('Heat Layer Error:', e);
-    }
   }
 
   async function toggleEarthquakesLayer(enable) {
