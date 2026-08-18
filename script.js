@@ -871,9 +871,10 @@
     }
 
     try {
-      showToast('Loading NASA AIRS Surface Temperature & Thermal Anomaly stream...');
-      const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/AIRS_L2_Surface_Air_Temperature_Day/default/default/GoogleMapsCompatible_Level6/{z}/{x}/{y}.png';
-      const opacity = state.hazardOpacities.heat || 0.75;
+      showToast('Loading Global Surface Temperature & Thermal Gradient...');
+      // NASA MERRA-2 Global Continuous Reanalysis 2m Air Temperature Layer
+      const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MERRA2_2m_Air_Temperature_Monthly/default/default/GoogleMapsCompatible_Level6/{z}/{x}/{y}.png';
+      const opacity = state.hazardOpacities.heat || 0.65;
 
       if (state.hazardLayers.heat) {
         state.map.removeLayer(state.hazardLayers.heat);
@@ -884,10 +885,10 @@
         maxZoom: 20,
         opacity: opacity,
         zIndex: 650,
-        attribution: '&copy; NASA GIBS AIRS Surface Temperature'
+        attribution: '&copy; NASA GIBS MERRA-2 Global Temperature Reanalysis'
       }).addTo(state.map);
 
-      showToast('Surface Temperature & Thermal Heat Map active.');
+      showToast('Global Surface Temperature & Heat Map active.');
     } catch (e) {
       console.error('Heat Layer Error:', e);
     }
