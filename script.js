@@ -557,19 +557,30 @@
     setupHazardAndEnvironmentalControls();
 
     // Quick Zoom Presets: Standard Safe View (Z11 - zero blackout) and 1m Detail (Z18)
-    document.getElementById('btn-zoom-standard')?.addEventListener('click', () => {
-      layerMenu?.classList.add('hidden');
+    document.getElementById('btn-zoom-standard')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       zoomToStandard();
     });
-    document.getElementById('btn-zoom-to-safe')?.addEventListener('click', () => {
+    document.getElementById('btn-zoom-to-safe')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       zoomToStandard();
     });
 
-    document.getElementById('btn-zoom-1m')?.addEventListener('click', () => {
+    document.getElementById('btn-zoom-1m')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       zoomTo1Meter();
     });
-    document.getElementById('btn-zoom-to-1m')?.addEventListener('click', () => {
+    document.getElementById('btn-zoom-to-1m')?.addEventListener('click', (e) => {
+      e.stopPropagation();
       zoomTo1Meter();
+    });
+
+    // Mobile GIS Sidebar Toggle Button
+    const mobileSidebarToggle = document.getElementById('btn-toggle-gis-sidebar');
+    const gisSidebar = document.getElementById('gis-sidebar');
+    mobileSidebarToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      gisSidebar?.classList.toggle('mobile-open');
     });
 
     // Satellite Overlay Toggle Button (in info panel)
@@ -1889,30 +1900,28 @@
   function zoomToStandard() {
     if (!state.map) return;
     const center = state.map.getCenter();
-    state.map.flyTo(center, 11, {
-      duration: state.settings.animations ? 0.9 : 0
-    });
-    showToast('Switched to Standard Overview (Zoom 11 - Crisp view across all layers).');
+    try {
+      state.map.flyTo(center, 11, { duration: 1.0 });
+    } catch {
+      state.map.setView(center, 11);
+    }
+    showToast('🏙️ Standard View (Zoom 11) active.');
   }
 
   function zoomTo1Meter() {
     if (!state.map) return;
     const currentLayer = state.settings.mapLayer;
-    // If currently on macro/vector layer, switch to true sub-meter satellite
-    if (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('imagery') && !currentLayer.includes('naip')) {
+    // If currently on vector/osm, switch to high-resolution satellite
+    if (!currentLayer || (!currentLayer.includes('sat') && !currentLayer.includes('clarity') && !currentLayer.includes('imagery'))) {
       setMapLayer('esri_sat');
     }
     const center = state.map.getCenter();
-    const lat = center.lat;
-    const rad = (lat * Math.PI) / 180;
-    // Calculate required zoom for GSD <= 1.0 meter
-    const reqZoom = Math.ceil(Math.log2(Math.max(1, 156543.03392 * Math.cos(rad))));
-    const targetZoom = Math.min(19, Math.max(17, reqZoom));
-    
-    state.map.flyTo(center, targetZoom, {
-      duration: state.settings.animations ? 1.2 : 0
-    });
-    showToast(`Zoomed to 1-meter sub-meter detail (Zoom ${targetZoom}).`);
+    try {
+      state.map.flyTo(center, 18, { duration: 1.2 });
+    } catch {
+      state.map.setView(center, 18);
+    }
+    showToast('🔍 1m Detail View (Zoom 18) active.');
   }
 
   function updateSatelliteIntelligenceUI(layerKey) {
