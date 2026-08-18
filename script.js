@@ -870,19 +870,27 @@
       return;
     }
 
-    // NASA GIBS Surface Air Temperature Day Thermal Anomaly Layer
-    const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/AIRS_L2_Surface_Air_Temperature_Day/default/default/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png';
-    const opacity = state.hazardOpacities.heat || 0.70;
+    try {
+      showToast('Loading NASA AIRS Surface Temperature & Thermal Anomaly stream...');
+      const heatUrl = 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/AIRS_L2_Surface_Air_Temperature_Day/default/default/GoogleMapsCompatible_Level6/{z}/{x}/{y}.png';
+      const opacity = state.hazardOpacities.heat || 0.75;
 
-    state.hazardLayers.heat = L.tileLayer(heatUrl, {
-      maxNativeZoom: 6,
-      maxZoom: 20,
-      opacity: opacity,
-      zIndex: 615,
-      attribution: '&copy; NASA GIBS Surface Temperature'
-    }).addTo(state.map);
+      if (state.hazardLayers.heat) {
+        state.map.removeLayer(state.hazardLayers.heat);
+      }
 
-    showToast('Surface Temperature & Heat Map active.');
+      state.hazardLayers.heat = L.tileLayer(heatUrl, {
+        maxNativeZoom: 6,
+        maxZoom: 20,
+        opacity: opacity,
+        zIndex: 650,
+        attribution: '&copy; NASA GIBS AIRS Surface Temperature'
+      }).addTo(state.map);
+
+      showToast('Surface Temperature & Thermal Heat Map active.');
+    } catch (e) {
+      console.error('Heat Layer Error:', e);
+    }
   }
 
   async function toggleEarthquakesLayer(enable) {
