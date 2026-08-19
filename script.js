@@ -579,42 +579,61 @@
     const gisSidebar = document.getElementById('gis-sidebar');
     const gisBackdrop = document.getElementById('gis-sidebar-backdrop');
     
-    function openMobileDrawer() {
-      gisSidebar?.classList.add('mobile-open');
-      gisBackdrop?.classList.remove('hidden');
-    }
+    window.openGISMobileDrawer = function() {
+      const sb = document.getElementById('gis-sidebar') || gisSidebar;
+      const bd = document.getElementById('gis-sidebar-backdrop') || gisBackdrop;
+      sb?.classList.add('mobile-open');
+      bd?.classList.remove('hidden');
+    };
     
-    function closeMobileDrawer() {
-      gisSidebar?.classList.remove('mobile-open');
-      gisBackdrop?.classList.add('hidden');
-    }
+    window.closeGISMobileDrawer = function() {
+      const sb = document.getElementById('gis-sidebar') || gisSidebar;
+      const bd = document.getElementById('gis-sidebar-backdrop') || gisBackdrop;
+      sb?.classList.remove('mobile-open');
+      bd?.classList.add('hidden');
+    };
 
-    document.getElementById('btn-toggle-gis-sidebar')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (gisSidebar?.classList.contains('mobile-open')) {
-        closeMobileDrawer();
-      } else {
-        openMobileDrawer();
+    window.toggleGISMobileDrawer = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
-    });
+      const sb = document.getElementById('gis-sidebar') || gisSidebar;
+      if (sb?.classList.contains('mobile-open')) {
+        window.closeGISMobileDrawer();
+      } else {
+        window.openGISMobileDrawer();
+      }
+    };
 
-    document.getElementById('btn-floating-layers')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openMobileDrawer();
-    });
+    const toggleBtn = document.getElementById('btn-toggle-gis-sidebar');
+    const floatingBtn = document.getElementById('btn-floating-layers');
+    const closeBtn = document.getElementById('btn-close-gis-sidebar');
 
-    document.getElementById('btn-close-gis-sidebar')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeMobileDrawer();
+    ['click', 'pointerdown'].forEach(evt => {
+      toggleBtn?.addEventListener(evt, window.toggleGISMobileDrawer, { passive: false });
+      floatingBtn?.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openGISMobileDrawer();
+      }, { passive: false });
+      closeBtn?.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.closeGISMobileDrawer();
+      }, { passive: false });
+      gisBackdrop?.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.closeGISMobileDrawer();
+      }, { passive: false });
     });
-
-    gisBackdrop?.addEventListener('click', closeMobileDrawer);
 
     // Auto-close mobile drawer when layer selected on small screens
     document.querySelectorAll('.layer-option').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-          setTimeout(closeMobileDrawer, 200);
+        if (window.innerWidth <= 1024) {
+          setTimeout(window.closeGISMobileDrawer, 250);
         }
       });
     });
