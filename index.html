@@ -125,7 +125,12 @@
           <span class="sidebar-header-icon">🗺️</span>
           <span class="sidebar-header-title">GIS &amp; Map Layers</span>
         </div>
-        <span class="sidebar-live-pill">LIVE FEED</span>
+        <div class="sidebar-header-right">
+          <span class="sidebar-live-pill">LIVE</span>
+          <button id="btn-close-gis-sidebar" class="sidebar-close-btn" aria-label="Close Layers Drawer" title="Close">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
       </div>
 
       <!-- Live GSD Resolution & Scale Telemetry Header Card -->
@@ -505,6 +510,19 @@
         </div>
       </div>
     </aside>
+
+    <!-- Mobile Drawer Dark Backdrop Overlay -->
+    <div id="gis-sidebar-backdrop" class="gis-sidebar-backdrop hidden" aria-hidden="true"></div>
+
+    <!-- Floating Mobile Layers FAB (Always Visible on Mobile/Tablet) -->
+    <button id="btn-floating-layers" class="floating-layers-fab" title="Open Map Layers" aria-label="Open Map Layers">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      <span>Layers</span>
+    </button>
 
     <!-- Floating Custom Map Controls (Top Right of Map) -->
     <div class="map-floating-controls">

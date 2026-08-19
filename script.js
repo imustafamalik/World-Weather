@@ -575,12 +575,48 @@
       zoomTo1Meter();
     });
 
-    // Mobile GIS Sidebar Toggle Button
-    const mobileSidebarToggle = document.getElementById('btn-toggle-gis-sidebar');
+    // Mobile GIS Sidebar Drawer Controller
     const gisSidebar = document.getElementById('gis-sidebar');
-    mobileSidebarToggle?.addEventListener('click', (e) => {
+    const gisBackdrop = document.getElementById('gis-sidebar-backdrop');
+    
+    function openMobileDrawer() {
+      gisSidebar?.classList.add('mobile-open');
+      gisBackdrop?.classList.remove('hidden');
+    }
+    
+    function closeMobileDrawer() {
+      gisSidebar?.classList.remove('mobile-open');
+      gisBackdrop?.classList.add('hidden');
+    }
+
+    document.getElementById('btn-toggle-gis-sidebar')?.addEventListener('click', (e) => {
       e.stopPropagation();
-      gisSidebar?.classList.toggle('mobile-open');
+      if (gisSidebar?.classList.contains('mobile-open')) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
+      }
+    });
+
+    document.getElementById('btn-floating-layers')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openMobileDrawer();
+    });
+
+    document.getElementById('btn-close-gis-sidebar')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileDrawer();
+    });
+
+    gisBackdrop?.addEventListener('click', closeMobileDrawer);
+
+    // Auto-close mobile drawer when layer selected on small screens
+    document.querySelectorAll('.layer-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          setTimeout(closeMobileDrawer, 200);
+        }
+      });
     });
 
     // Satellite Overlay Toggle Button (in info panel)
