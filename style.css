@@ -590,10 +590,15 @@ a:hover {
 
 /* Left Part: Permanent GIS & Legend Sidebar */
 .gis-sidebar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  bottom: 0;
   width: 360px;
   min-width: 340px;
   max-width: 390px;
-  height: 100%;
+  height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   background: var(--bg-panel-solid);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -3447,20 +3452,23 @@ input:checked + .slider::before {
   }
 
   .gis-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 340px;
-    max-width: 88vw;
-    height: 100vh;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 320px !important;
+    max-width: 88vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    height: -webkit-fill-available !important;
     z-index: 2000 !important;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     box-shadow: 16px 0 50px rgba(0, 0, 0, 0.95);
-    background: #0b1120;
-    padding-top: 16px;
+    background: #0b1120 !important;
+    padding: 14px 12px !important;
     pointer-events: auto !important;
+    display: flex !important;
   }
 
   .gis-sidebar.mobile-open {
@@ -3517,26 +3525,23 @@ input:checked + .slider::before {
     height: 36px;
     justify-content: center;
     border-radius: 50%;
+    flex-shrink: 0;
   }
   
   .header-btn.icon-only {
     width: 36px;
+    flex-shrink: 0;
   }
 
   .search-container {
     max-width: none;
     flex: 1;
+    min-width: 0;
   }
 
   .search-input-wrapper {
     height: 36px;
     padding: 0 10px;
-  }
-
-  /* Mobile Drawer Transformation for GIS Sidebar */
-  .app-split-container {
-    top: 56px;
-    height: calc(100vh - 56px);
   }
 
   .map-floating-controls {
@@ -3563,6 +3568,54 @@ input:checked + .slider::before {
     transform: none !important;
     padding: 14px;
   }
+}
+
+/* iPhone SE (2020) & Small Screen Optimization (<= 420px) */
+@media (max-width: 420px) {
+  .app-header {
+    padding: 0 6px;
+    gap: 4px;
+    height: 52px;
+  }
+
+  .header-brand {
+    padding: 4px;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .header-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+
+  .header-btn.icon-only {
+    width: 32px;
+    min-width: 32px;
+  }
+
+  .search-input-wrapper {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 12.5px;
+  }
+
+  .floating-layers-fab {
+    top: 60px;
+    left: 10px;
+    padding: 7px 13px;
+    font-size: 12px;
+  }
+
+  .gis-sidebar {
+    width: 300px !important;
+    max-width: 90vw !important;
+  }
+}
 
   /* Mobile Bottom Sheet Transformation */
   .info-panel {
