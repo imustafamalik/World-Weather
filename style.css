@@ -1495,7 +1495,7 @@ a:hover {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-.plane-div-icon {
+.plane-div-icon, .vessel-div-icon {
   transition: transform 0.95s linear !important;
 }
 
