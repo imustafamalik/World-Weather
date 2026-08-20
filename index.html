@@ -41,6 +41,9 @@
   <!-- Fullscreen Map Canvas -->
   <div id="map" class="map-canvas" aria-label="Interactive world map"></div>
 
+  <!-- 3D Interactive WebGL Globe Canvas -->
+  <div id="globe-container" class="globe-container hidden" aria-label="3D Interactive Earth Globe"></div>
+
   <!-- Center Crosshair for Precision Mode -->
   <div id="precision-crosshair" class="precision-crosshair hidden" aria-hidden="true">
     <div class="crosshair-circle"></div>
@@ -173,6 +176,21 @@
         </div>
         <label class="layer-toggle-switch" for="toggle-weather-click-mode">
           <input type="checkbox" id="toggle-weather-click-mode" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 3D Globe Mode Toggle Card -->
+      <div class="layer-mode-toggle-card globe-mode-card">
+        <div class="mode-toggle-left">
+          <span class="mode-icon">🌐</span>
+          <div class="mode-text-wrap">
+            <span class="mode-title">3D Globe Mode</span>
+            <span class="mode-desc">Spherical Earth & 3D Flight Arcs</span>
+          </div>
+        </div>
+        <label class="layer-toggle-switch" for="toggle-globe-mode-gis">
+          <input type="checkbox" id="toggle-globe-mode-gis">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -546,6 +564,17 @@
         </button>
         <button id="ctrl-zoom-out" class="map-ctrl-btn" title="Zoom Out" aria-label="Zoom Out">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+
+      <div class="control-group">
+        <button id="ctrl-toggle-globe" class="map-ctrl-btn globe-toggle-btn" title="Toggle 3D Interactive Globe Mode" aria-label="Toggle 3D Globe Mode">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+            <path d="M2 12h20"></path>
+          </svg>
+          <span class="globe-mode-pill">3D</span>
         </button>
       </div>
 
@@ -1308,6 +1337,10 @@
 
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Three.js & Globe.gl 3D Engine -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.32.0/dist/globe.gl.min.js"></script>
 
   <!-- Lightweight i18n Dictionary -->
   <script src="strings.js"></script>

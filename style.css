@@ -924,6 +924,7 @@ a:hover {
   height: 42px;
   color: var(--text-primary);
   transition: all var(--transition-fast);
+  position: relative;
 }
 
 .map-ctrl-btn:hover {
@@ -934,6 +935,51 @@ a:hover {
 .map-ctrl-btn.active {
   background: rgba(6, 182, 212, 0.25);
   color: var(--cyan-400);
+}
+
+.globe-toggle-btn .globe-mode-pill {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: var(--cyan-500);
+  color: #070a12;
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.map-ctrl-btn.globe-toggle-btn.active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(59, 130, 246, 0.35));
+  color: var(--cyan-300);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+}
+
+.globe-mode-card {
+  border-left: 3px solid var(--cyan-400) !important;
+}
+
+/* 3D WebGL Globe Fullscreen Canvas Container */
+.globe-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background: radial-gradient(circle at 50% 50%, #0d1a33 0%, #070a12 70%, #020408 100%);
+  overflow: hidden;
+  cursor: grab;
+}
+
+.globe-container:active {
+  cursor: grabbing;
+}
+
+.globe-container.hidden {
+  display: none !important;
 }
 
 .control-group .map-ctrl-btn:not(:last-child) {

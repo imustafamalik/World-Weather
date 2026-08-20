@@ -277,6 +277,8 @@
   // -------------------------------------------------------------------
   const state = {
     map: null,
+    globe: null,
+    globeModeEnabled: false,
     activeTileLayer: null,
     overlayTileLayer: null,
     showOverlayLabels: false,
@@ -1516,6 +1518,10 @@
           activeTrajectoryLayer.setLatLngs([f.originCoords, [f.lat, f.lng], f.destCoords]);
         }
       });
+
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
     }, 1000);
   }
 
@@ -1784,6 +1790,10 @@
           activeTrajectoryLayer.setLatLngs([v.originCoords, [v.lat, v.lng], v.destCoords]);
         }
       });
+
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
     }, 1000);
   }
 
@@ -1869,6 +1879,243 @@
     }
 
     return list;
+  }
+
+  // -------------------------------------------------------------------
+  // 5D. 3D INTERACTIVE WEBGL GLOBE WITH 3D ELEVATION TRAJECTORIES
+  // -------------------------------------------------------------------
+  let globeInstance = null;
+  let isGlobeInitialized = false;
+
+  function initGlobe() {
+    const container = document.getElementById('globe-container');
+    if (!container || typeof Globe === 'undefined') {
+      console.warn('Globe.gl or container element not available');
+      return;
+    }
+
+    if (globeInstance) return;
+
+    try {
+      globeInstance = Globe()(container)
+        .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg')
+        .bumpImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png')
+        .showAtmosphere(true)
+        .atmosphereColor('#38bdf8')
+        .atmosphereAltitude(0.18)
+        .onGlobeClick(({ lat, lng }) => {
+          if (!state.weatherClickModeEnabled) return;
+          const normalizedLng = ((lng + 180) % 360 + 360) % 360 - 180;
+          selectLocation(lat, normalizedLng);
+        });
+
+      // Configure Great-Circle 3D Curved Flight & Shipping Trajectory Arcs
+      globeInstance
+        .arcStartLat(d => d.startLat)
+        .arcStartLng(d => d.startLng)
+        .arcEndLat(d => d.endLat)
+        .arcEndLng(d => d.endLng)
+        .arcColor(d => d.color || ['#38bdf8', '#06b6d4'])
+        .arcAltitude(d => d.altitude || 0.15)
+        .arcStroke(d => d.stroke || 1.2)
+        .arcDashLength(0.4)
+        .arcDashGap(0.25)
+        .arcDashInitialGap(d => d.dashOffset || 0)
+        .arcDashAnimateTime(2600);
+
+      // Configure 3D Elevated Aircraft & Maritime Objects with Perpendicular Drop Lines
+      globeInstance
+        .customLayerData([])
+        .customThreeObject(d => {
+          if (typeof THREE === 'undefined') return new THREE.Object3D();
+
+          const group = new THREE.Group();
+
+          if (d.entityType === 'aircraft') {
+            // Altitude scaling: 35000 ft -> normalized 3D altitude stem
+            const altRatio = Math.max(0.04, Math.min(0.14, ((d.altitudeFt || 35000) / 45000) * 0.12));
+            const globeRadius = globeInstance.getGlobeRadius ? globeInstance.getGlobeRadius() : 100;
+            const stemHeight = altRatio * globeRadius;
+
+            // 1. Perpendicular Altitude Drop-Line from Globe Surface (0) to Aircraft Elevation
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(0, 0, 0),
+              new THREE.Vector3(0, 0, stemHeight)
+            ]);
+            const lineMat = new THREE.LineBasicMaterial({
+              color: 0x38bdf8,
+              transparent: true,
+              opacity: 0.85
+            });
+            const dropLine = new THREE.Line(lineGeo, lineMat);
+            group.add(dropLine);
+
+            // 2. Surface Ground Projection Target Ring
+            const ringGeo = new THREE.RingGeometry(0.7, 1.4, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
+            const groundRing = new THREE.Mesh(ringGeo, ringMat);
+            group.add(groundRing);
+
+            // 3. Elevated 3D Aircraft Model at Altitude Stem Top
+            const planeMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+            const coneGeo = new THREE.ConeGeometry(1.6, 4.2, 5);
+            coneGeo.rotateX(Math.PI / 2);
+            const planeMesh = new THREE.Mesh(coneGeo, planeMat);
+            planeMesh.position.set(0, 0, stemHeight);
+
+            // Rotate along compass heading
+            const headingRad = ((d.heading || 0) * Math.PI) / 180;
+            planeMesh.rotation.z = -headingRad;
+            group.add(planeMesh);
+
+          } else if (d.entityType === 'vessel') {
+            // Sea-level Vessel Marker on Ocean Surface
+            const shipMat = new THREE.MeshBasicMaterial({ color: d.typeColor || 0x06b6d4 });
+            const shipGeo = new THREE.ConeGeometry(1.3, 3.5, 4);
+            shipGeo.rotateX(Math.PI / 2);
+            const shipMesh = new THREE.Mesh(shipGeo, shipMat);
+            shipMesh.position.set(0, 0, 0.4);
+            const cogRad = ((d.cog || 0) * Math.PI) / 180;
+            shipMesh.rotation.z = -cogRad;
+            group.add(shipMesh);
+          }
+
+          return group;
+        })
+        .customThreeObjectUpdate((obj, d) => {
+          Object.assign(obj.position, globeInstance.getCoords(d.lat, d.lng, 0));
+        });
+
+      // Window resize handler
+      window.addEventListener('resize', () => {
+        if (globeInstance && !container.classList.contains('hidden')) {
+          globeInstance.width(window.innerWidth).height(window.innerHeight);
+        }
+      });
+
+      isGlobeInitialized = true;
+    } catch (e) {
+      console.error('Error initializing 3D Globe:', e);
+    }
+  }
+
+  function toggleGlobeMode(enable) {
+    state.globeModeEnabled = !!enable;
+
+    const globeContainer = document.getElementById('globe-container');
+    const mapContainer = document.getElementById('map');
+    const globeCtrlBtn = document.getElementById('ctrl-toggle-globe');
+    const gisGlobeToggle = document.getElementById('toggle-globe-mode-gis');
+
+    if (gisGlobeToggle && gisGlobeToggle.checked !== state.globeModeEnabled) {
+      gisGlobeToggle.checked = state.globeModeEnabled;
+    }
+
+    if (state.globeModeEnabled) {
+      globeCtrlBtn?.classList.add('active');
+      globeContainer?.classList.remove('hidden');
+      mapContainer?.classList.add('hidden');
+
+      if (!isGlobeInitialized) {
+        initGlobe();
+      }
+
+      if (globeInstance) {
+        globeInstance.width(window.innerWidth).height(window.innerHeight);
+
+        // Center 3D globe on current location or map center
+        const center = state.selectedLocation ? state.selectedLocation : (state.map ? state.map.getCenter() : { lat: 33.68, lng: 73.04 });
+        globeInstance.pointOfView({ lat: center.lat, lng: center.lng, altitude: 2.2 }, 1200);
+
+        updateGlobeData();
+      }
+
+      showToast('3D Interactive Globe Mode active: Live elevation trajectories & flight arcs rendered.');
+    } else {
+      globeCtrlBtn?.classList.remove('active');
+      globeContainer?.classList.add('hidden');
+      mapContainer?.classList.remove('hidden');
+
+      // Refresh 2D Leaflet map view
+      setTimeout(() => {
+        state.map?.invalidateSize();
+      }, 100);
+
+      showToast('Switched to 2D Map View.');
+    }
+  }
+
+  function updateGlobeData() {
+    if (!globeInstance || !state.globeModeEnabled) return;
+
+    const customObjects = [];
+    const arcs = [];
+
+    // 1. Add 3D Aircraft with elevation stems and 3D flight arcs
+    if (activeAircraftFleet && activeAircraftFleet.length > 0) {
+      activeAircraftFleet.forEach(f => {
+        customObjects.push({
+          entityType: 'aircraft',
+          id: f.id,
+          lat: f.lat,
+          lng: f.lng,
+          altitudeFt: f.altitudeFt,
+          speedKmh: f.speedKmh,
+          heading: f.heading,
+          airline: f.airline,
+          flightNum: f.flightNum,
+          origin: f.origin,
+          dest: f.dest
+        });
+
+        // 3D Parabolic Great-Circle Flight Trajectory Arc
+        if (f.originCoords && f.destCoords) {
+          arcs.push({
+            startLat: f.originCoords[0],
+            startLng: f.originCoords[1],
+            endLat: f.destCoords[0],
+            endLng: f.destCoords[1],
+            color: ['#38bdf8', '#06b6d4'],
+            altitude: 0.14,
+            stroke: 1.1,
+            dashOffset: (Math.sin(Number(f.id.replace(/\D/g, '')) || 0) * 1.5)
+          });
+        }
+      });
+    }
+
+    // 2. Add 3D Marine Vessels with sea-level shipping lane arcs
+    if (activeMaritimeFleet && activeMaritimeFleet.length > 0) {
+      activeMaritimeFleet.forEach(v => {
+        customObjects.push({
+          entityType: 'vessel',
+          id: v.id,
+          lat: v.lat,
+          lng: v.lng,
+          cog: v.cog,
+          sogKmh: v.sogKmh,
+          name: v.name,
+          type: v.type,
+          typeColor: v.typeColor
+        });
+
+        if (v.originCoords && v.destCoords) {
+          arcs.push({
+            startLat: v.originCoords[0],
+            startLng: v.originCoords[1],
+            endLat: v.destCoords[0],
+            endLng: v.destCoords[1],
+            color: [v.typeColor || '#3b82f6', '#0284c7'],
+            altitude: 0.04,
+            stroke: 0.8,
+            dashOffset: (Math.sin(Number(v.id.replace(/\D/g, '')) || 0) * 1.5)
+          });
+        }
+      });
+    }
+
+    globeInstance.arcsData(arcs);
+    globeInstance.customLayerData(customObjects);
   }
 
   // -------------------------------------------------------------------
@@ -2505,6 +2752,11 @@
     const infoPanel = document.getElementById('info-panel');
     infoPanel?.classList.remove('hidden');
     document.getElementById('weather-error-state')?.classList.add('hidden');
+
+    // Pan 3D Globe to selected coordinates if Globe mode is active
+    if (state.globeModeEnabled && globeInstance) {
+      globeInstance.pointOfView({ lat: roundedLat, lng: roundedLng }, 1000);
+    }
 
     // Expand mobile bottom sheet if on mobile
     if (window.innerWidth <= 767) {
@@ -4061,6 +4313,14 @@
     });
 
     document.getElementById('brand-logo')?.addEventListener('click', resetMapWorldView);
+
+    // 3D Interactive Globe Mode Toggles
+    document.getElementById('ctrl-toggle-globe')?.addEventListener('click', () => {
+      toggleGlobeMode(!state.globeModeEnabled);
+    });
+    document.getElementById('toggle-globe-mode-gis')?.addEventListener('change', (e) => {
+      toggleGlobeMode(e.target.checked);
+    });
 
     // Auto-Refresh Every 10 min
     state.autoRefreshInterval = setInterval(() => {
