@@ -3915,6 +3915,28 @@ input:checked + .slider::before {
   }
 }
 
+/* Mobile Compact & Phablet Responsive Rule (<= 480px) */
+@media (max-width: 480px) {
+  .map-floating-controls {
+    top: 60px;
+    right: 10px;
+    gap: 6px;
+  }
+  .map-ctrl-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .globe-toggle-btn .globe-mode-pill {
+    font-size: 7.5px;
+    padding: 1px 2.5px;
+  }
+  .floating-telemetry-bar {
+    bottom: 80px;
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
 /* iPhone SE (2020) & Small Screen Optimization (<= 420px) */
 @media (max-width: 420px) {
   .app-header {
