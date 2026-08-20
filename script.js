@@ -1494,6 +1494,9 @@
     });
 
     state.hazardLayers.aircraft = layerGroup.addTo(state.map);
+    if (state.globeModeEnabled) {
+      updateGlobeData();
+    }
     showToast(`Air Traffic Radar active: Tracking ${activeAircraftFleet.length} live aircraft per second!`);
 
     // 1-Second Live Vector Motion Loop (Dead Reckoning)
@@ -1769,6 +1772,9 @@
     });
 
     state.hazardLayers.vessels = layerGroup.addTo(state.map);
+    if (state.globeModeEnabled) {
+      updateGlobeData();
+    }
     showToast(`Marine AIS Vessels active: Tracking ${activeMaritimeFleet.length} vessels per second!`);
 
     // 1-Second Live AIS Motion Loop (Dead Reckoning)
@@ -2155,14 +2161,34 @@
 
   function syncGlobeBasemapTexture(layerKey) {
     if (!globeInstance) return;
-    if (layerKey.includes('sat') || layerKey.includes('satellite') || layerKey === 'esri_sat') {
-      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg');
-    } else if (layerKey.includes('dark') || layerKey === 'carto_dark') {
-      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-night.jpg');
-    } else if (layerKey.includes('topo') || layerKey === 'opentopo') {
-      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png');
+    const lk = (layerKey || '').toLowerCase();
+
+    // Map all 12 basemaps to high-definition planetary textures
+    if (lk === 'nasa_night' || lk === 'dark') {
+      globeInstance
+        .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-night.jpg')
+        .bumpImageUrl('')
+        .atmosphereColor('#6366f1')
+        .atmosphereAltitude(0.15);
+    } else if (lk === 'opentopo') {
+      globeInstance
+        .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png')
+        .bumpImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png')
+        .atmosphereColor('#10b981')
+        .atmosphereAltitude(0.18);
+    } else if (lk === 'osm' || lk === 'voyager') {
+      globeInstance
+        .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-day.jpg')
+        .bumpImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png')
+        .atmosphereColor('#38bdf8')
+        .atmosphereAltitude(0.20);
     } else {
-      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-day.jpg');
+      // esri_sat, google_sat, google_hybrid, esri_clarity, usgs_imagery, esa_sentinel2, nasa_modis
+      globeInstance
+        .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg')
+        .bumpImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png')
+        .atmosphereColor('#38bdf8')
+        .atmosphereAltitude(0.18);
     }
   }
 
