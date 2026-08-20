@@ -907,6 +907,10 @@
         state.map.removeLayer(state.hazardLayers.earthquakes);
         state.hazardLayers.earthquakes = null;
       }
+      state.earthquakeData = [];
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
       return;
     }
 
@@ -1004,7 +1008,11 @@
         layerGroup.addLayer(marker);
       });
 
+      state.earthquakeData = data.features;
       state.hazardLayers.earthquakes = layerGroup.addTo(state.map);
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
       showToast(`Loaded ${data.features.length} live earthquakes from USGS.`);
     } catch (e) {
       console.error('USGS Earthquakes Error:', e);
@@ -1380,6 +1388,9 @@
         clearInterval(state.hazardPollTimers.aircraft);
         delete state.hazardPollTimers.aircraft;
       }
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
       return;
     }
 
@@ -1644,6 +1655,9 @@
         clearInterval(state.hazardPollTimers.vessels);
         delete state.hazardPollTimers.vessels;
       }
+      if (state.globeModeEnabled) {
+        updateGlobeData();
+      }
       return;
     }
 
@@ -1887,6 +1901,69 @@
   let globeInstance = null;
   let isGlobeInitialized = false;
 
+  function createAirplaneMesh3D(color = 0x22d3ee) {
+    if (typeof THREE === 'undefined') return null;
+    const plane = new THREE.Group();
+
+    const bodyMat = new THREE.MeshPhongMaterial({ color: 0xf8fafc, shininess: 40 });
+    const wingMat = new THREE.MeshPhongMaterial({ color: color, shininess: 50 });
+
+    // 1. Fuselage (Cylinder lying flat tangent to Earth, along Y/forward)
+    const fuselageGeo = new THREE.CylinderGeometry(0.18, 0.14, 1.8, 8);
+    fuselageGeo.rotateX(Math.PI / 2);
+    const fuselage = new THREE.Mesh(fuselageGeo, bodyMat);
+    plane.add(fuselage);
+
+    // 2. Nose cone
+    const noseGeo = new THREE.ConeGeometry(0.18, 0.5, 8);
+    noseGeo.rotateX(Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, bodyMat);
+    nose.position.set(0, 0, 1.15);
+    plane.add(nose);
+
+    // 3. Main Wings (Flat box spanning horizontal X)
+    const wingsGeo = new THREE.BoxGeometry(2.3, 0.04, 0.5);
+    const wings = new THREE.Mesh(wingsGeo, wingMat);
+    wings.position.set(0, 0, 0.15);
+    plane.add(wings);
+
+    // 4. Tail Horizontal Stabilizers
+    const hStabGeo = new THREE.BoxGeometry(0.85, 0.03, 0.25);
+    const hStab = new THREE.Mesh(hStabGeo, wingMat);
+    hStab.position.set(0, 0, -0.85);
+    plane.add(hStab);
+
+    // 5. Tail Vertical Fin (Extending outward in local +Y)
+    const vStabGeo = new THREE.BoxGeometry(0.04, 0.42, 0.3);
+    const vStab = new THREE.Mesh(vStabGeo, wingMat);
+    vStab.position.set(0, 0.22, -0.85);
+    plane.add(vStab);
+
+    return plane;
+  }
+
+  function createVesselMesh3D(color = 0x06b6d4) {
+    if (typeof THREE === 'undefined') return null;
+    const ship = new THREE.Group();
+
+    const hullMat = new THREE.MeshPhongMaterial({ color: color });
+    const deckMat = new THREE.MeshPhongMaterial({ color: 0xf1f5f9 });
+
+    // Ship Hull
+    const hullGeo = new THREE.BoxGeometry(0.5, 0.25, 1.8);
+    const hull = new THREE.Mesh(hullGeo, hullMat);
+    hull.position.set(0, 0.12, 0);
+    ship.add(hull);
+
+    // Deck Cabin Superstructure
+    const cabinGeo = new THREE.BoxGeometry(0.38, 0.28, 0.55);
+    const cabin = new THREE.Mesh(cabinGeo, deckMat);
+    cabin.position.set(0, 0.35, -0.25);
+    ship.add(cabin);
+
+    return ship;
+  }
+
   function initGlobe() {
     const container = document.getElementById('globe-container');
     if (!container || typeof Globe === 'undefined') {
@@ -1904,6 +1981,12 @@
         .atmosphereColor('#38bdf8')
         .atmosphereAltitude(0.18)
         .onGlobeClick(({ lat, lng }) => {
+          // Clear active trajectory when clicking outside
+          selectedAircraftId = null;
+          selectedVesselId = null;
+          clearActiveTrajectory();
+          updateGlobeData();
+
           if (!state.weatherClickModeEnabled) return;
           const normalizedLng = ((lng + 180) % 360 + 360) % 360 - 180;
           selectLocation(lat, normalizedLng);
@@ -1915,13 +1998,13 @@
         .arcStartLng(d => d.startLng)
         .arcEndLat(d => d.endLat)
         .arcEndLng(d => d.endLng)
-        .arcColor(d => d.color || ['#38bdf8', '#06b6d4'])
-        .arcAltitude(d => d.altitude || 0.15)
-        .arcStroke(d => d.stroke || 1.2)
+        .arcColor(d => d.color || ['#38bdf8', '#22c55e'])
+        .arcAltitude(d => d.altitude || 0.16)
+        .arcStroke(d => d.stroke || 2.0)
         .arcDashLength(0.4)
-        .arcDashGap(0.25)
-        .arcDashInitialGap(d => d.dashOffset || 0)
-        .arcDashAnimateTime(2600);
+        .arcDashGap(0.2)
+        .arcDashInitialGap(0)
+        .arcDashAnimateTime(2400);
 
       // Configure 3D Elevated Aircraft & Maritime Objects with Perpendicular Drop Lines
       globeInstance
@@ -1932,12 +2015,12 @@
           const group = new THREE.Group();
 
           if (d.entityType === 'aircraft') {
-            // Altitude scaling: 35000 ft -> normalized 3D altitude stem
-            const altRatio = Math.max(0.04, Math.min(0.14, ((d.altitudeFt || 35000) / 45000) * 0.12));
+            // Precise altitude stem: 1.2 to 2.2 units above surface (radius 100)
+            const altRatio = Math.max(0.012, Math.min(0.024, ((d.altitudeFt || 35000) / 45000) * 0.022));
             const globeRadius = globeInstance.getGlobeRadius ? globeInstance.getGlobeRadius() : 100;
-            const stemHeight = altRatio * globeRadius;
+            const stemHeight = altRatio * globeRadius; // ~1.2 - 2.2 units
 
-            // 1. Perpendicular Altitude Drop-Line from Globe Surface (0) to Aircraft Elevation
+            // 1. Perpendicular Altitude Drop-Line from Earth Surface (0) to Aircraft Elevation
             const lineGeo = new THREE.BufferGeometry().setFromPoints([
               new THREE.Vector3(0, 0, 0),
               new THREE.Vector3(0, 0, stemHeight)
@@ -1950,40 +2033,60 @@
             const dropLine = new THREE.Line(lineGeo, lineMat);
             group.add(dropLine);
 
-            // 2. Surface Ground Projection Target Ring
-            const ringGeo = new THREE.RingGeometry(0.7, 1.4, 16);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
+            // 2. Ground Surface Projection Target Dot/Ring
+            const ringGeo = new THREE.RingGeometry(0.25, 0.55, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
             const groundRing = new THREE.Mesh(ringGeo, ringMat);
             group.add(groundRing);
 
-            // 3. Elevated 3D Aircraft Model at Altitude Stem Top
-            const planeMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
-            const coneGeo = new THREE.ConeGeometry(1.6, 4.2, 5);
-            coneGeo.rotateX(Math.PI / 2);
-            const planeMesh = new THREE.Mesh(coneGeo, planeMat);
-            planeMesh.position.set(0, 0, stemHeight);
-
-            // Rotate along compass heading
-            const headingRad = ((d.heading || 0) * Math.PI) / 180;
-            planeMesh.rotation.z = -headingRad;
-            group.add(planeMesh);
+            // 3. Elevated 3D Airplane Mesh Model at Top of Drop-Line
+            const planeMesh = createAirplaneMesh3D(0x22d3ee);
+            if (planeMesh) {
+              planeMesh.position.set(0, 0, stemHeight);
+              // Rotate tangent to surface along compass heading
+              const headingRad = ((d.heading || 0) * Math.PI) / 180;
+              planeMesh.rotation.z = -headingRad;
+              group.add(planeMesh);
+            }
 
           } else if (d.entityType === 'vessel') {
             // Sea-level Vessel Marker on Ocean Surface
-            const shipMat = new THREE.MeshBasicMaterial({ color: d.typeColor || 0x06b6d4 });
-            const shipGeo = new THREE.ConeGeometry(1.3, 3.5, 4);
-            shipGeo.rotateX(Math.PI / 2);
-            const shipMesh = new THREE.Mesh(shipGeo, shipMat);
-            shipMesh.position.set(0, 0, 0.4);
-            const cogRad = ((d.cog || 0) * Math.PI) / 180;
-            shipMesh.rotation.z = -cogRad;
-            group.add(shipMesh);
+            const vesselMesh = createVesselMesh3D(d.typeColor || 0x06b6d4);
+            if (vesselMesh) {
+              vesselMesh.position.set(0, 0, 0.1);
+              const cogRad = ((d.cog || 0) * Math.PI) / 180;
+              vesselMesh.rotation.z = -cogRad;
+              group.add(vesselMesh);
+            }
           }
 
           return group;
         })
         .customThreeObjectUpdate((obj, d) => {
           Object.assign(obj.position, globeInstance.getCoords(d.lat, d.lng, 0));
+        })
+        .onCustomLayerClick((d) => {
+          if (d.entityType === 'aircraft') {
+            selectedAircraftId = d.id;
+            selectedVesselId = null;
+            updateGlobeData();
+            selectLocation(d.lat, d.lng, {
+              placeName: `${d.airline} ${d.flightNum}`,
+              country: `${d.origin} → ${d.dest}`,
+              flag: '✈️'
+            });
+            showToast(`Flight ${d.flightNum} selected: Live 3D Great-Circle route displayed.`);
+          } else if (d.entityType === 'vessel') {
+            selectedVesselId = d.id;
+            selectedAircraftId = null;
+            updateGlobeData();
+            selectLocation(d.lat, d.lng, {
+              placeName: d.name,
+              country: d.country,
+              flag: '🚢'
+            });
+            showToast(`Vessel ${d.name} selected: Live shipping lane route displayed.`);
+          }
         });
 
       // Window resize handler
@@ -2027,10 +2130,15 @@
         const center = state.selectedLocation ? state.selectedLocation : (state.map ? state.map.getCenter() : { lat: 33.68, lng: 73.04 });
         globeInstance.pointOfView({ lat: center.lat, lng: center.lng, altitude: 2.2 }, 1200);
 
+        // Sync active basemap texture to globe
+        if (state.settings.mapLayer) {
+          syncGlobeBasemapTexture(state.settings.mapLayer);
+        }
+
         updateGlobeData();
       }
 
-      showToast('3D Interactive Globe Mode active: Live elevation trajectories & flight arcs rendered.');
+      showToast('3D Interactive Globe Mode active: Click an aircraft to inspect its single Great-Circle flight arc.');
     } else {
       globeCtrlBtn?.classList.remove('active');
       globeContainer?.classList.add('hidden');
@@ -2045,14 +2153,27 @@
     }
   }
 
+  function syncGlobeBasemapTexture(layerKey) {
+    if (!globeInstance) return;
+    if (layerKey.includes('sat') || layerKey.includes('satellite') || layerKey === 'esri_sat') {
+      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg');
+    } else if (layerKey.includes('dark') || layerKey === 'carto_dark') {
+      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-night.jpg');
+    } else if (layerKey.includes('topo') || layerKey === 'opentopo') {
+      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png');
+    } else {
+      globeInstance.globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-day.jpg');
+    }
+  }
+
   function updateGlobeData() {
     if (!globeInstance || !state.globeModeEnabled) return;
 
     const customObjects = [];
     const arcs = [];
 
-    // 1. Add 3D Aircraft with elevation stems and 3D flight arcs
-    if (activeAircraftFleet && activeAircraftFleet.length > 0) {
+    // 1. Add 3D Aircraft
+    if (activeAircraftFleet && activeAircraftFleet.length > 0 && state.hazardLayers.aircraft) {
       activeAircraftFleet.forEach(f => {
         customObjects.push({
           entityType: 'aircraft',
@@ -2065,27 +2186,32 @@
           airline: f.airline,
           flightNum: f.flightNum,
           origin: f.origin,
-          dest: f.dest
+          dest: f.dest,
+          originCoords: f.originCoords,
+          destCoords: f.destCoords
         });
+      });
 
-        // 3D Parabolic Great-Circle Flight Trajectory Arc
-        if (f.originCoords && f.destCoords) {
+      // ONLY show 3D trajectory curve if an aircraft is currently selected!
+      if (selectedAircraftId) {
+        const selFlight = activeAircraftFleet.find(f => f.id === selectedAircraftId);
+        if (selFlight && selFlight.originCoords && selFlight.destCoords) {
           arcs.push({
-            startLat: f.originCoords[0],
-            startLng: f.originCoords[1],
-            endLat: f.destCoords[0],
-            endLng: f.destCoords[1],
-            color: ['#38bdf8', '#06b6d4'],
-            altitude: 0.14,
-            stroke: 1.1,
-            dashOffset: (Math.sin(Number(f.id.replace(/\D/g, '')) || 0) * 1.5)
+            startLat: selFlight.originCoords[0],
+            startLng: selFlight.originCoords[1],
+            endLat: selFlight.destCoords[0],
+            endLng: selFlight.destCoords[1],
+            color: ['#38bdf8', '#22c55e'],
+            altitude: 0.18,
+            stroke: 2.2,
+            dashOffset: 0
           });
         }
-      });
+      }
     }
 
-    // 2. Add 3D Marine Vessels with sea-level shipping lane arcs
-    if (activeMaritimeFleet && activeMaritimeFleet.length > 0) {
+    // 2. Add 3D Marine Vessels
+    if (activeMaritimeFleet && activeMaritimeFleet.length > 0 && state.hazardLayers.vessels) {
       activeMaritimeFleet.forEach(v => {
         customObjects.push({
           entityType: 'vessel',
@@ -2095,27 +2221,53 @@
           cog: v.cog,
           sogKmh: v.sogKmh,
           name: v.name,
+          country: v.country,
           type: v.type,
-          typeColor: v.typeColor
+          typeColor: v.typeColor,
+          originCoords: v.originCoords,
+          destCoords: v.destCoords
         });
+      });
 
-        if (v.originCoords && v.destCoords) {
+      // ONLY show 3D shipping lane curve if a vessel is currently selected!
+      if (selectedVesselId) {
+        const selVessel = activeMaritimeFleet.find(v => v.id === selectedVesselId);
+        if (selVessel && selVessel.originCoords && selVessel.destCoords) {
           arcs.push({
-            startLat: v.originCoords[0],
-            startLng: v.originCoords[1],
-            endLat: v.destCoords[0],
-            endLng: v.destCoords[1],
-            color: [v.typeColor || '#3b82f6', '#0284c7'],
-            altitude: 0.04,
-            stroke: 0.8,
-            dashOffset: (Math.sin(Number(v.id.replace(/\D/g, '')) || 0) * 1.5)
+            startLat: selVessel.originCoords[0],
+            startLng: selVessel.originCoords[1],
+            endLat: selVessel.destCoords[0],
+            endLng: selVessel.destCoords[1],
+            color: [selVessel.typeColor || '#3b82f6', '#0284c7'],
+            altitude: 0.05,
+            stroke: 1.8,
+            dashOffset: 0
           });
         }
-      });
+      }
     }
 
     globeInstance.arcsData(arcs);
     globeInstance.customLayerData(customObjects);
+
+    // 3. Earthquakes on 3D Globe
+    if (state.earthquakeData && state.earthquakeData.length > 0 && state.hazardLayers.earthquakes) {
+      const eqRings = state.earthquakeData.map(eq => {
+        const [lng, lat] = eq.geometry.coordinates;
+        const mag = eq.properties.mag || 4.5;
+        return {
+          lat,
+          lng,
+          maxR: Math.max(1.8, mag * 1.2),
+          propagationSpeed: 1.8,
+          repeatPeriod: 1400,
+          color: mag >= 6 ? '#ef4444' : (mag >= 4.5 ? '#f97316' : '#f59e0b')
+        };
+      });
+      globeInstance.ringsData(eqRings);
+    } else {
+      globeInstance.ringsData([]);
+    }
   }
 
   // -------------------------------------------------------------------
@@ -2187,6 +2339,9 @@
 
     state.activeTileLayer = L.tileLayer(config.url, layerOptions).addTo(state.map);
     state.settings.mapLayer = layerKey;
+
+    // Sync 3D Globe surface texture
+    syncGlobeBasemapTexture(layerKey);
 
     // US-Only datasets navigation prompt
     if (layerKey === 'usgs_imagery') {
