@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>World Weather & Elevation Explorer</title>
   <meta name="description" content="Explore live weather, 24-hour & 7-day forecasts, terrain elevation, local time, and geographic coordinates anywhere on Earth with interactive maps and satellite imagery.">
   <meta name="theme-color" content="#070a12">
@@ -18,10 +18,26 @@
   <!-- JSZip Library for Tile Bundling -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
+  <!-- PWA Manifest & App Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Network Connectivity Status Banner -->
+  <div id="network-status-banner" class="network-status-banner hidden" role="alert" aria-live="assertive">
+    <div class="network-banner-content">
+      <span class="network-banner-icon" id="network-banner-icon">📡</span>
+      <span class="network-banner-text" id="network-banner-text">No internet connection. Some features may be limited.</span>
+    </div>
+    <button id="btn-dismiss-network-banner" class="network-banner-dismiss" aria-label="Dismiss offline banner" title="Dismiss">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
   <!-- Fullscreen Map Canvas -->
   <div id="map" class="map-canvas" aria-label="Interactive world map"></div>
 
@@ -753,6 +769,12 @@
           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
           <span id="distance-text">Calculating distance...</span>
         </div>
+
+        <!-- Cached Data Notification Bar -->
+        <div id="cached-data-notice" class="cached-data-notice hidden">
+          <span class="cached-pulse"></span>
+          <span id="cached-notice-text">Showing cached data from 08:30 PM</span>
+        </div>
       </section>
 
       <!-- Section 2: Large Weather Hero Card -->
@@ -777,11 +799,30 @@
           </div>
         </div>
 
+        <!-- Inline Error State with Retry Button -->
+        <div id="weather-error-state" class="weather-error-state hidden">
+          <div class="weather-error-content">
+            <span class="weather-error-icon">⚠️</span>
+            <div class="weather-error-text-wrap">
+              <span class="weather-error-title">Weather Unavailable</span>
+              <span id="weather-error-msg" class="weather-error-msg">Failed to load live forecast data.</span>
+            </div>
+          </div>
+          <button id="btn-retry-weather" class="btn-retry-weather" type="button" title="Retry fetching weather for this spot">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            <span>Retry</span>
+          </button>
+        </div>
+
         <!-- Skeleton Placeholder for Weather Hero -->
         <div id="weather-skeleton" class="skeleton-overlay hidden">
           <div class="skeleton-line lg w-60"></div>
           <div class="skeleton-line md w-40"></div>
           <div class="skeleton-line sm w-80"></div>
+          <div id="slow-connection-warning" class="slow-connection-warning hidden">
+            <span class="slow-icon">⏳</span>
+            <span class="slow-text">Still loading, the connection seems slow...</span>
+          </div>
         </div>
       </section>
 
@@ -1267,6 +1308,9 @@
 
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Lightweight i18n Dictionary -->
+  <script src="strings.js"></script>
 
   <!-- Application Logic -->
   <script src="script.js"></script>

@@ -1035,6 +1035,11 @@ a:hover {
   transition: transform var(--transition-fast);
 }
 
+.layer-accordion-item.open .accordion-arrow {
+  transform: rotate(180deg);
+  color: var(--cyan-400);
+}
+
 .layer-accordion-content {
   display: flex;
   flex-direction: column;
@@ -1046,49 +1051,6 @@ a:hover {
 
 .layer-accordion-content.hidden {
   display: none !important;
-}
-  border: none;
-  color: var(--text-primary);
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.layer-accordion-header:hover {
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.accordion-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.accordion-icon {
-  font-size: 13px;
-}
-
-.accordion-arrow {
-  font-size: 9px;
-  color: var(--text-muted);
-  transition: transform var(--transition-fast);
-}
-
-.layer-accordion-item.open .accordion-arrow {
-  color: var(--cyan-400);
-}
-
-.layer-accordion-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.15);
-}
-
-.layer-accordion-content.hidden {
-  display: none;
 }
 
 /* Layer Sub-Categories & Options */
@@ -2548,6 +2510,143 @@ a:hover {
   100% { background-position: 200% 0; }
 }
 
+/* Weather Hero Error State with Visible Retry Button */
+.weather-error-state {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: fadeIn 0.25s ease-out;
+  position: relative;
+  z-index: 6;
+}
+
+.weather-error-state.hidden {
+  display: none !important;
+}
+
+.weather-error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.weather-error-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.weather-error-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weather-error-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.weather-error-msg {
+  font-size: 11px;
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.btn-retry-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  border-radius: var(--radius-pill);
+  color: #fecaca;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.btn-retry-weather:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+}
+
+/* Cached Data Notification Bar */
+.cached-data-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  margin-top: 6px;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: var(--radius-pill);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cyan-300);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.cached-data-notice.hidden {
+  display: none !important;
+}
+
+.cached-data-notice .cached-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cyan-400);
+  box-shadow: 0 0 8px var(--cyan-400);
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+/* Slow Connection Warning near skeleton */
+.slow-connection-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-top: 6px;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-sm);
+  color: #fde68a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slow-connection-warning.hidden {
+  display: none !important;
+}
+
+.slow-connection-warning .slow-icon {
+  font-size: 14px;
+}
+
 /* Section 3: Essential Metrics Grid (4 items) */
 .card-grid.four-cols {
   display: grid;
@@ -3380,6 +3479,95 @@ input:checked + .slider::before {
   border-color: var(--rose-500);
 }
 
+/* ----------------- Network Connectivity Floating Banner ----------------- */
+.network-status-banner {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 15px rgba(0, 0, 0, 0.4);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  animation: slideDownBanner 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s ease;
+  max-width: calc(100vw - 32px);
+  pointer-events: auto;
+}
+
+.network-status-banner.hidden {
+  display: none !important;
+}
+
+@keyframes slideDownBanner {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.network-status-banner.offline {
+  background: rgba(220, 38, 38, 0.92);
+  border: 1px solid rgba(254, 202, 202, 0.4);
+  color: #ffffff;
+}
+
+.network-status-banner.online {
+  background: rgba(16, 185, 129, 0.92);
+  border: 1px solid rgba(167, 243, 208, 0.4);
+  color: #ffffff;
+}
+
+.network-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.network-banner-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.network-banner-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.network-banner-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.network-banner-dismiss:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
 /* ----------------- Responsive Breakpoints & Mobile Bottom Sheet ----------------- */
 /* Mobile Drawer Backdrop */
 .gis-sidebar-backdrop {
@@ -3568,54 +3756,6 @@ input:checked + .slider::before {
     transform: none !important;
     padding: 14px;
   }
-}
-
-/* iPhone SE (2020) & Small Screen Optimization (<= 420px) */
-@media (max-width: 420px) {
-  .app-header {
-    padding: 0 6px;
-    gap: 4px;
-    height: 52px;
-  }
-
-  .header-brand {
-    padding: 4px;
-  }
-
-  .header-actions {
-    gap: 4px;
-  }
-
-  .header-btn {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    flex-shrink: 0;
-  }
-
-  .header-btn.icon-only {
-    width: 32px;
-    min-width: 32px;
-  }
-
-  .search-input-wrapper {
-    height: 34px;
-    padding: 0 8px;
-    font-size: 12.5px;
-  }
-
-  .floating-layers-fab {
-    top: 60px;
-    left: 10px;
-    padding: 7px 13px;
-    font-size: 12px;
-  }
-
-  .gis-sidebar {
-    width: 300px !important;
-    max-width: 90vw !important;
-  }
-}
 
   /* Mobile Bottom Sheet Transformation */
   .info-panel {
@@ -3722,6 +3862,53 @@ input:checked + .slider::before {
 
   .drawer-panel {
     max-width: 100%;
+  }
+}
+
+/* iPhone SE (2020) & Small Screen Optimization (<= 420px) */
+@media (max-width: 420px) {
+  .app-header {
+    padding: 0 6px;
+    gap: 4px;
+    height: 52px;
+  }
+
+  .header-brand {
+    padding: 4px;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .header-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+
+  .header-btn.icon-only {
+    width: 32px;
+    min-width: 32px;
+  }
+
+  .search-input-wrapper {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 12.5px;
+  }
+
+  .floating-layers-fab {
+    top: 60px;
+    left: 10px;
+    padding: 7px 13px;
+    font-size: 12px;
+  }
+
+  .gis-sidebar {
+    width: 300px !important;
+    max-width: 90vw !important;
   }
 }
 

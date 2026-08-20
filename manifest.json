@@ -1,0 +1,19 @@
+{
+  "name": "World Weather & Elevation Explorer",
+  "short_name": "World Weather",
+  "description": "Explore live weather, 24-hour & 7-day forecasts, terrain elevation, local time, and geographic coordinates anywhere on Earth with interactive maps.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070a12",
+  "theme_color": "#070a12",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

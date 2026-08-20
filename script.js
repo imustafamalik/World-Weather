@@ -368,8 +368,11 @@
   function getWMOInfo(code, isDay = 1) {
     const defaultInfo = { desc: 'Variable Weather', dayIcon: '🌡️', nightIcon: '🌡️' };
     const entry = WMO_CODES[code] || defaultInfo;
+    const translatedDesc = (typeof window !== 'undefined' && typeof window.t === 'function') 
+      ? window.t(`wmo_${code}`, entry.desc) 
+      : entry.desc;
     return {
-      desc: entry.desc,
+      desc: translatedDesc,
       icon: isDay ? entry.dayIcon : entry.nightIcon
     };
   }
@@ -2260,8 +2263,71 @@
   }
 
   // -------------------------------------------------------------------
-  // 7. LOCATION SELECTION ENGINE & DATA ORCHESTRATION
+  // 7. LOCATION SELECTION ENGINE & DATA ORCHESTRATION WITH CACHING
   // -------------------------------------------------------------------
+  const CACHE_KEY_PREFIX = 'wwe_weather_cache_';
+  const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  function getCacheKey(lat, lng) {
+    return `${CACHE_KEY_PREFIX}${lat.toFixed(3)}_${lng.toFixed(3)}`;
+  }
+
+  function getCachedWeatherData(lat, lng) {
+    try {
+      const key = getCacheKey(lat, lng);
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.timestamp > CACHE_MAX_AGE_MS) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setCachedWeatherData(lat, lng, data) {
+    try {
+      const key = getCacheKey(lat, lng);
+      const payload = {
+        timestamp: Date.now(),
+        timeFormatted: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        ...data
+      };
+      localStorage.setItem(key, JSON.stringify(payload));
+    } catch (e) {
+      // Storage might be full, handle gracefully
+    }
+  }
+
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const parentSignal = options.signal;
+
+    if (parentSignal) {
+      if (parentSignal.aborted) {
+        clearTimeout(timer);
+        throw new DOMException('Aborted', 'AbortError');
+      }
+      parentSignal.addEventListener('abort', () => {
+        clearTimeout(timer);
+        controller.abort();
+      });
+    }
+
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      throw err;
+    }
+  }
+
   async function selectLocation(lat, lng, options = {}) {
     const validLat = Math.max(-90, Math.min(90, parseFloat(lat)));
     const validLng = Math.max(-180, Math.min(180, parseFloat(lng)));
@@ -2289,11 +2355,52 @@
     // Show info panel
     const infoPanel = document.getElementById('info-panel');
     infoPanel?.classList.remove('hidden');
-    document.getElementById('weather-skeleton')?.classList.remove('hidden');
+    document.getElementById('weather-error-state')?.classList.add('hidden');
 
     // Expand mobile bottom sheet if on mobile
     if (window.innerWidth <= 767) {
       infoPanel?.classList.remove('collapsed');
+    }
+
+    // Check if we have cached data for this location
+    const cached = getCachedWeatherData(roundedLat, roundedLng);
+    const cachedNotice = document.getElementById('cached-data-notice');
+    const cachedNoticeText = document.getElementById('cached-notice-text');
+    let hasRenderedCache = false;
+
+    if (cached && cached.weatherData) {
+      try {
+        hasRenderedCache = true;
+        const cachedMeta = cached.locationMeta || {
+          name: options.placeName || 'Custom Location',
+          subname: `${formatCoordinate(roundedLat, 'lat')}, ${formatCoordinate(roundedLng, 'lng')}`,
+          country: options.country || '',
+          countryCode: options.countryCode || '',
+          flag: options.flag || '📍'
+        };
+        state.selectedLocation = { lat: roundedLat, lng: roundedLng, ...cachedMeta };
+        updateLocationHeadingUI(cachedMeta);
+        updateWeatherUI(cached.weatherData);
+        if (cached.weatherData.timezone) {
+          startLocalClock(cached.weatherData.timezone, cached.weatherData.utc_offset_seconds);
+        }
+        if (cached.elevationData !== undefined && cached.elevationData !== null) {
+          updateElevationUI(cached.elevationData);
+        }
+        updateForecastHourlyUI(cached.weatherData);
+        updateForecastDailyUI(cached.weatherData);
+
+        if (cachedNotice && cachedNoticeText) {
+          cachedNoticeText.textContent = `Showing cached data from ${cached.timeFormatted || 'earlier'}`;
+          cachedNotice.classList.remove('hidden');
+        }
+        document.getElementById('weather-skeleton')?.classList.add('hidden');
+      } catch (err) {
+        console.warn('Error displaying cached data:', err);
+      }
+    } else {
+      document.getElementById('weather-skeleton')?.classList.remove('hidden');
+      cachedNotice?.classList.add('hidden');
     }
 
     // Move map & marker
@@ -2305,11 +2412,18 @@
       });
     }
 
-    const placeNameCandidate = options.placeName || 'Loading location...';
+    const placeNameCandidate = options.placeName || (cached?.locationMeta?.name) || 'Loading location...';
     updateMapMarker(roundedLat, roundedLng, placeNameCandidate);
 
     updateURLState(roundedLat, roundedLng);
     updateCoordinatesUI(roundedLat, roundedLng);
+
+    // 8-Second Slow Connection Warning Timer
+    const slowWarningTimer = setTimeout(() => {
+      if (thisRequestId === state.activeRequestId) {
+        document.getElementById('slow-connection-warning')?.classList.remove('hidden');
+      }
+    }, 8000);
 
     // Concurrent Parallel API Fetching
     const weatherPromise = fetchWeatherData(roundedLat, roundedLng, signal);
@@ -2329,6 +2443,9 @@
       elevationPromise,
       geocodePromise
     ]);
+
+    clearTimeout(slowWarningTimer);
+    document.getElementById('slow-connection-warning')?.classList.add('hidden');
 
     if (thisRequestId !== state.activeRequestId) {
       return; // Stale request, discard
@@ -2361,6 +2478,16 @@
     if (weatherResult.status === 'fulfilled' && weatherResult.value) {
       state.currentWeatherData = weatherResult.value;
       state.lastUpdatedTimestamp = Date.now();
+
+      // Store fresh copy in localStorage cache
+      setCachedWeatherData(roundedLat, roundedLng, {
+        weatherData: weatherResult.value,
+        elevationData: elevationResult.status === 'fulfilled' ? elevationResult.value : null,
+        locationMeta
+      });
+
+      // Hide cached notice as fresh data is now active
+      cachedNotice?.classList.add('hidden');
       
       try { updateWeatherUI(weatherResult.value); } catch (e) { console.error('Weather UI error:', e); }
       try { updateCelestialUI(weatherResult.value); } catch (e) { console.error('Celestial UI error:', e); }
@@ -2369,7 +2496,11 @@
       try { startLocalClock(weatherResult.value.timezone, weatherResult.value.utc_offset_seconds); } catch (e) { console.error('Clock error:', e); }
       try { startFreshnessTicker(); } catch (e) {}
     } else {
-      showWeatherError(weatherResult.reason?.message || 'Weather data unavailable.');
+      if (!hasRenderedCache) {
+        showWeatherError(weatherResult.reason?.message || 'Weather data unavailable.');
+      } else {
+        showToast('Could not refresh weather; continuing with cached data.', 'warning');
+      }
     }
 
     // Process Elevation Result
@@ -2463,10 +2594,10 @@
   }
 
   async function reverseGeocode(lat, lng, signal) {
-    // 1. Primary Service: BigDataCloud Client Reverse Geocode
+    // 1. Primary Service: BigDataCloud Client Reverse Geocode (3.5s timeout)
     try {
       const url = `${API.reverseGeocodePrimary}?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
-      const res = await fetch(url, { signal });
+      const res = await fetchWithTimeout(url, { signal }, 3500);
       if (res.ok) {
         const data = await res.json();
         const city = data.city || data.locality || data.principalSubdivision || '';
@@ -2476,30 +2607,56 @@
         const name = city || (country ? country : 'Custom Location');
         const subname = city && country ? `${city}, ${country}` : (country || 'Coordinates Point');
 
-        return { name, subname, country, countryCode, flag };
+        if (name && name !== 'Custom Location') {
+          return { name, subname, country, countryCode, flag };
+        }
       }
     } catch (e) {
-      if (e.name === 'AbortError') throw e;
+      if (e.name === 'AbortError' && signal?.aborted) throw e;
     }
 
-    // 2. Fallback Service: Nominatim OSM
+    // 2. Fallback Service 1: Nominatim OpenStreetMap (3.5s timeout)
     try {
       const fallbackUrl = `${API.reverseGeocodeFallback}?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
-      const res = await fetch(fallbackUrl, { signal });
+      const res = await fetchWithTimeout(fallbackUrl, { signal, headers: { 'Accept-Language': 'en' } }, 3500);
       if (res.ok) {
         const data = await res.json();
         const addr = data.address || {};
-        const city = addr.city || addr.town || addr.village || addr.county || addr.state || '';
+        const city = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state || '';
         const country = addr.country || '';
         const countryCode = (addr.country_code || '').toUpperCase();
         const flag = countryCode ? countryCodeToEmoji(countryCode) : '📍';
         const name = city || (country ? country : 'Custom Location');
         const subname = data.display_name ? data.display_name.split(',').slice(0, 3).join(',') : (country || 'Custom Spot');
 
-        return { name, subname, country, countryCode, flag };
+        if (name && name !== 'Custom Location') {
+          return { name, subname, country, countryCode, flag };
+        }
       }
     } catch (e) {
-      if (e.name === 'AbortError') throw e;
+      if (e.name === 'AbortError' && signal?.aborted) throw e;
+    }
+
+    // 3. Fallback Service 2: Open-Meteo Geocoding Nearest City Search (3s timeout)
+    try {
+      const omUrl = `${API.geocoding}?name=${lat.toFixed(1)},${lng.toFixed(1)}&count=1&language=en&format=json`;
+      const res = await fetchWithTimeout(omUrl, { signal }, 3000);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const r = data.results[0];
+          const flag = r.country_code ? countryCodeToEmoji(r.country_code) : '📍';
+          return {
+            name: r.name,
+            subname: r.country ? `${r.name}, ${r.country}` : r.name,
+            country: r.country || '',
+            countryCode: r.country_code || '',
+            flag
+          };
+        }
+      }
+    } catch (e) {
+      if (e.name === 'AbortError' && signal?.aborted) throw e;
     }
 
     return {
@@ -2727,6 +2884,9 @@
   function updateWeatherUI(data) {
     const current = data.current;
     if (!current) return;
+
+    // Clear any previous error state
+    document.getElementById('weather-error-state')?.classList.add('hidden');
 
     const wmo = getWMOInfo(current.weather_code, current.is_day);
 
@@ -3055,6 +3215,12 @@
   function showWeatherError(msg) {
     const heroCond = document.getElementById('hero-weather-condition');
     if (heroCond) heroCond.textContent = 'Weather Unavailable';
+
+    const errState = document.getElementById('weather-error-state');
+    const errMsg = document.getElementById('weather-error-msg');
+    if (errMsg) errMsg.textContent = msg || 'Weather data could not be fetched for this spot.';
+    if (errState) errState.classList.remove('hidden');
+
     showToast(msg || 'Weather data could not be fetched for this spot.', 'warning');
   }
 
@@ -3718,6 +3884,19 @@
       toggleMobileSheet();
     });
 
+    // Weather Retry Button
+    document.getElementById('btn-retry-weather')?.addEventListener('click', () => {
+      if (state.selectedLocation && state.selectedLocation.lat != null && state.selectedLocation.lng != null) {
+        selectLocation(state.selectedLocation.lat, state.selectedLocation.lng, {
+          panTo: false,
+          placeName: state.selectedLocation.name,
+          country: state.selectedLocation.country,
+          countryCode: state.selectedLocation.countryCode,
+          flag: state.selectedLocation.flag
+        });
+      }
+    });
+
     // Quick Places Chips
     document.querySelectorAll('.quick-chip').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3748,12 +3927,73 @@
   }
 
   // -------------------------------------------------------------------
+  // 17B. NETWORK CONNECTIVITY MONITOR (ONLINE / OFFLINE)
+  // -------------------------------------------------------------------
+  function initNetworkMonitor() {
+    const banner = document.getElementById('network-status-banner');
+    const bannerText = document.getElementById('network-banner-text');
+    const bannerIcon = document.getElementById('network-banner-icon');
+    const dismissBtn = document.getElementById('btn-dismiss-network-banner');
+    let reconnectTimeout = null;
+
+    function updateNetworkStatus(isOnline) {
+      if (!banner) return;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+
+      if (!isOnline) {
+        banner.classList.remove('hidden', 'online');
+        banner.classList.add('offline');
+        if (bannerIcon) bannerIcon.textContent = '📡';
+        if (bannerText) bannerText.textContent = 'No internet connection. Some features may be limited.';
+      } else {
+        if (banner.classList.contains('offline')) {
+          banner.classList.remove('offline');
+          banner.classList.add('online');
+          if (bannerIcon) bannerIcon.textContent = '🟢';
+          if (bannerText) bannerText.textContent = 'Back online. Live updates restored.';
+          reconnectTimeout = setTimeout(() => {
+            banner.classList.add('hidden');
+          }, 3500);
+        } else {
+          banner.classList.add('hidden');
+        }
+      }
+    }
+
+    window.addEventListener('online', () => updateNetworkStatus(true));
+    window.addEventListener('offline', () => updateNetworkStatus(false));
+
+    dismissBtn?.addEventListener('click', () => {
+      banner?.classList.add('hidden');
+    });
+
+    if (!navigator.onLine) {
+      updateNetworkStatus(false);
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // 17C. SERVICE WORKER REGISTRATION (PWA OFFLINE APP SHELL)
+  // -------------------------------------------------------------------
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('Service Worker registration skipped or failed:', err);
+        });
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------
   // 18. APPLICATION BOOTSTRAP
   // -------------------------------------------------------------------
   function bootstrap() {
     loadStoredData();
     initMap();
     initSearch();
+    initNetworkMonitor();
+    registerServiceWorker();
     setupEventListeners();
 
     const hasURLCoords = checkURLParameters();
