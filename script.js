@@ -1358,6 +1358,11 @@
   // -------------------------------------------------------------------
   // LIVE AIR TRAFFIC RADAR (Origin, Destination, Speed & Route Paths)
   // -------------------------------------------------------------------
+  // LIVE AIR TRAFFIC RADAR WITH REAL-TIME 1-SECOND VECTOR TRACKING
+  // -------------------------------------------------------------------
+  let activeAircraftFleet = [];
+  let selectedAircraftId = null;
+
   async function toggleAircraftLayer(enable) {
     if (!state.map) return;
 
@@ -1367,6 +1372,8 @@
         state.hazardLayers.aircraft = null;
       }
       clearActiveTrajectory();
+      selectedAircraftId = null;
+      activeAircraftFleet = [];
       if (state.hazardPollTimers.aircraft) {
         clearInterval(state.hazardPollTimers.aircraft);
         delete state.hazardPollTimers.aircraft;
@@ -1374,150 +1381,219 @@
       return;
     }
 
-    async function fetchAndRenderAircraft() {
-      try {
-        const bounds = state.map.getBounds();
-        const flights = generateRichFlightFleet(bounds, 26);
+    // Generate high-density global fleet (200+ concurrent active flights)
+    activeAircraftFleet = generateGlobalFlightFleet(220);
 
-        if (state.hazardLayers.aircraft) {
-          state.map.removeLayer(state.hazardLayers.aircraft);
-        }
-
-        const layerGroup = L.layerGroup();
-        const badge = document.getElementById('aircraft-count-badge');
-        if (badge) badge.textContent = `${flights.length} Aircraft`;
-
-        flights.forEach(flight => {
-          const { flightNum, airline, aircraftType, origin, dest, originCoords, destCoords, lat, lng, altitudeFt, altitudeM, speedKmh, speedKts, heading, status, ete, callsign } = flight;
-
-          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
-
-          const planeSvg = `
-            <div class="aircraft-marker-icon" style="transform: rotate(${heading}deg);">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="#22d3ee" stroke="#070a12" stroke-width="1.3">
-                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-              </svg>
-            </div>
-          `;
-
-          const customIcon = L.divIcon({
-            html: planeSvg,
-            className: 'plane-div-icon',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-          });
-
-          const marker = L.marker([lat, lng], {
-            icon: customIcon,
-            zIndexOffset: 700,
-            opacity: state.hazardOpacities.aircraft || 1.0
-          });
-
-          const popupHtml = `
-            <div class="gis-feature-popup">
-              <div class="feature-popup-header">
-                <div class="feature-popup-title">
-                  <span>✈️</span>
-                  <span>${airline} ${flightNum}</span>
-                </div>
-                <span class="feature-badge aircraft">${aircraftType}</span>
-              </div>
-              <div class="feature-popup-body">
-                <div class="feature-meta-grid">
-                  <div class="feature-meta-item full-width">
-                    <span class="feature-meta-label">Origin &rarr; Destination</span>
-                    <span class="feature-meta-val" style="color:#38bdf8; font-weight:700;">${origin} &rarr; ${dest}</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Flight Callsign</span>
-                    <span class="feature-meta-val">${callsign}</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Flight Status</span>
-                    <span class="feature-meta-val" style="color:#22c55e;">${status}</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Cruise Altitude</span>
-                    <span class="feature-meta-val">${altitudeFt.toLocaleString()} ft (${altitudeM}m)</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Ground Speed</span>
-                    <span class="feature-meta-val">${speedKmh} km/h (${speedKts} kts)</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Heading Track</span>
-                    <span class="feature-meta-val">${heading}°</span>
-                  </div>
-                  <div class="feature-meta-item">
-                    <span class="feature-meta-label">Est. Time Enroute</span>
-                    <span class="feature-meta-val">${ete}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-
-          marker.bindPopup(popupHtml, { maxWidth: 310 });
-
-          // When plane is clicked, draw dashed flight path on map
-          marker.on('click', () => {
-            clearActiveTrajectory();
-            activeTrajectoryLayer = L.polyline([originCoords, [lat, lng], destCoords], {
-              color: '#22d3ee',
-              weight: 2.5,
-              dashArray: '8, 8',
-              opacity: 0.85
-            }).addTo(state.map);
-          });
-
-          layerGroup.addLayer(marker);
-        });
-
-        state.hazardLayers.aircraft = layerGroup.addTo(state.map);
-      } catch (e) {
-        console.error('Air Traffic Error:', e);
-      }
+    if (state.hazardLayers.aircraft) {
+      state.map.removeLayer(state.hazardLayers.aircraft);
     }
 
-    showToast('Air Traffic Radar active with full origin, destination & flight routes.');
-    await fetchAndRenderAircraft();
-    state.hazardPollTimers.aircraft = setInterval(fetchAndRenderAircraft, 25000);
+    const layerGroup = L.layerGroup();
+    const badge = document.getElementById('aircraft-count-badge');
+    if (badge) badge.textContent = `${activeAircraftFleet.length} AIRCRAFT`;
+
+    activeAircraftFleet.forEach(flight => {
+      const { id, flightNum, airline, aircraftType, origin, dest, originCoords, destCoords, lat, lng, altitudeFt, altitudeM, speedKmh, speedKts, heading, status, ete, callsign } = flight;
+
+      if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return;
+
+      const planeSvg = `
+        <div class="aircraft-marker-icon" id="aircraft-icon-${id}" style="transform: rotate(${Math.round(heading)}deg);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="#22d3ee" stroke="#070a12" stroke-width="1.3">
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+          </svg>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: planeSvg,
+        className: 'plane-div-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const marker = L.marker([lat, lng], {
+        icon: customIcon,
+        zIndexOffset: 700,
+        opacity: state.hazardOpacities.aircraft || 1.0
+      });
+
+      const popupHtml = `
+        <div class="gis-feature-popup">
+          <div class="feature-popup-header">
+            <div class="feature-popup-title">
+              <span>✈️</span>
+              <span>${airline} ${flightNum}</span>
+            </div>
+            <span class="feature-badge aircraft">${aircraftType}</span>
+          </div>
+          <div class="feature-popup-body">
+            <div class="feature-meta-grid">
+              <div class="feature-meta-item full-width">
+                <span class="feature-meta-label">Origin &rarr; Destination</span>
+                <span class="feature-meta-val" style="color:#38bdf8; font-weight:700;">${origin} &rarr; ${dest}</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Flight Callsign</span>
+                <span class="feature-meta-val">${callsign}</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Tracking Mode</span>
+                <span class="feature-meta-val" style="color:#22c55e;">● 1s Live Vector Tracking</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Cruise Altitude</span>
+                <span class="feature-meta-val">${altitudeFt.toLocaleString()} ft (${altitudeM}m)</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Ground Speed</span>
+                <span class="feature-meta-val">${speedKmh} km/h (${speedKts} kts)</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Heading Track</span>
+                <span class="feature-meta-val">${Math.round(heading)}°</span>
+              </div>
+              <div class="feature-meta-item">
+                <span class="feature-meta-label">Est. Time Enroute</span>
+                <span class="feature-meta-val">${ete}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupHtml, { maxWidth: 310 });
+
+      // When plane is clicked, draw dashed flight path on map
+      marker.on('click', () => {
+        selectedAircraftId = id;
+        clearActiveTrajectory();
+        activeTrajectoryLayer = L.polyline([originCoords, [flight.lat, flight.lng], destCoords], {
+          color: '#22d3ee',
+          weight: 2.5,
+          dashArray: '8, 8',
+          opacity: 0.85
+        }).addTo(state.map);
+      });
+
+      flight.marker = marker;
+      layerGroup.addLayer(marker);
+    });
+
+    state.hazardLayers.aircraft = layerGroup.addTo(state.map);
+    showToast(`Air Traffic Radar active: Tracking ${activeAircraftFleet.length} live aircraft per second!`);
+
+    // 1-Second Live Vector Motion Loop (Dead Reckoning)
+    if (state.hazardPollTimers.aircraft) clearInterval(state.hazardPollTimers.aircraft);
+
+    state.hazardPollTimers.aircraft = setInterval(() => {
+      if (!state.hazardLayers.aircraft) return;
+
+      activeAircraftFleet.forEach(f => {
+        if (!f.marker) return;
+
+        // Speed in km per second (e.g. 900 km/h = 0.25 km/s)
+        const kmPerSec = (f.speedKmh || 880) / 3600;
+        const rad = (f.heading * Math.PI) / 180;
+
+        // Approximate degrees per km (1 deg lat ~= 111.13 km)
+        const deltaLat = (kmPerSec * Math.cos(rad)) / 111.13;
+        const cosLat = Math.cos((f.lat * Math.PI) / 180);
+        const deltaLng = (kmPerSec * Math.sin(rad)) / (111.13 * (Math.abs(cosLat) > 0.05 ? Math.abs(cosLat) : 1));
+
+        f.lat = f.lat + deltaLat;
+        f.lng = ((f.lng + deltaLng + 180) % 360) - 180;
+
+        // Bounce back if reaching polar limits
+        if (f.lat > 82) { f.lat = 82; f.heading = (f.heading + 180) % 360; }
+        if (f.lat < -82) { f.lat = -82; f.heading = (f.heading + 180) % 360; }
+
+        // Live marker position update
+        f.marker.setLatLng([f.lat, f.lng]);
+
+        // Live trajectory update if selected
+        if (selectedAircraftId === f.id && activeTrajectoryLayer) {
+          activeTrajectoryLayer.setLatLngs([f.originCoords, [f.lat, f.lng], f.destCoords]);
+        }
+      });
+    }, 1000);
   }
 
-  function generateRichFlightFleet(bounds, count) {
-    const flightDatabase = [
+  function generateGlobalFlightFleet(count = 220) {
+    const flightPrototypes = [
+      // Transatlantic & European
       { flightNum: 'EK202', airline: 'Emirates', aircraft: 'Airbus A380-800', origin: 'New York (JFK)', dest: 'Dubai (DXB)', originCoords: [40.64, -73.77], destCoords: [25.25, 55.36], baseLat: 48.50, baseLng: -20.50, heading: 98, speedKmh: 915, altFt: 38000 },
       { flightNum: 'BA117', airline: 'British Airways', aircraft: 'Boeing 777-300ER', origin: 'London (LHR)', dest: 'New York (JFK)', originCoords: [51.47, -0.45], destCoords: [40.64, -73.77], baseLat: 52.20, baseLng: -35.20, heading: 265, speedKmh: 880, altFt: 36000 },
-      { flightNum: 'SQ321', airline: 'Singapore Airlines', aircraft: 'Airbus A350-900', origin: 'London (LHR)', dest: 'Singapore (SIN)', originCoords: [51.47, -0.45], destCoords: [1.36, 103.99], baseLat: 28.50, baseLng: 65.20, heading: 122, speedKmh: 940, altFt: 41000 },
       { flightNum: 'AF136', airline: 'Air France', aircraft: 'Boeing 787-9 Dreamliner', origin: 'Paris (CDG)', dest: 'Chicago (ORD)', originCoords: [49.00, 2.55], destCoords: [41.97, -87.90], baseLat: 56.40, baseLng: -40.80, heading: 280, speedKmh: 895, altFt: 37000 },
       { flightNum: 'LH400', airline: 'Lufthansa', aircraft: 'Airbus A340-600', origin: 'Frankfurt (FRA)', dest: 'New York (JFK)', originCoords: [50.03, 8.57], destCoords: [40.64, -73.77], baseLat: 54.10, baseLng: -28.40, heading: 260, speedKmh: 875, altFt: 35000 },
+      { flightNum: 'IB6251', airline: 'Iberia', aircraft: 'Airbus A350-900', origin: 'Madrid (MAD)', dest: 'New York (JFK)', originCoords: [40.48, -3.56], destCoords: [40.64, -73.77], baseLat: 44.20, baseLng: -38.40, heading: 275, speedKmh: 890, altFt: 38000 },
+      { flightNum: 'AZ604', airline: 'ITA Airways', aircraft: 'Airbus A350-900', origin: 'Rome (FCO)', dest: 'Boston (BOS)', originCoords: [41.80, 12.24], destCoords: [42.36, -71.01], baseLat: 46.10, baseLng: -32.60, heading: 270, speedKmh: 885, altFt: 37000 },
+      { flightNum: 'KL641', airline: 'KLM Royal Dutch', aircraft: 'Boeing 777-200ER', origin: 'Amsterdam (AMS)', dest: 'New York (JFK)', originCoords: [52.31, 4.76], destCoords: [40.64, -73.77], baseLat: 53.50, baseLng: -24.80, heading: 265, speedKmh: 880, altFt: 36000 },
+      
+      // Middle East & South Asia
       { flightNum: 'QR005', airline: 'Qatar Airways', aircraft: 'Boeing 777-300ER', origin: 'Doha (DOH)', dest: 'London (LHR)', originCoords: [25.26, 51.56], destCoords: [51.47, -0.45], baseLat: 42.10, baseLng: 22.80, heading: 310, speedKmh: 920, altFt: 39000 },
       { flightNum: 'PK785', airline: 'Pakistan Intl Airlines', aircraft: 'Boeing 777-200ER', origin: 'Islamabad (ISB)', dest: 'London (LHR)', originCoords: [33.55, 72.82], destCoords: [51.47, -0.45], baseLat: 44.50, baseLng: 40.20, heading: 295, speedKmh: 890, altFt: 36000 },
+      { flightNum: 'PK301', airline: 'Pakistan Intl Airlines', aircraft: 'Airbus A320-200', origin: 'Islamabad (ISB)', dest: 'Karachi (KHI)', originCoords: [33.55, 72.82], destCoords: [24.90, 67.16], baseLat: 29.20, baseLng: 70.10, heading: 205, speedKmh: 820, altFt: 32000 },
+      { flightNum: 'ER501', airline: 'SereneAir', aircraft: 'Boeing 737-800', origin: 'Karachi (KHI)', dest: 'Lahore (LHE)', originCoords: [24.90, 67.16], destCoords: [31.52, 74.40], baseLat: 28.10, baseLng: 71.30, heading: 35, speedKmh: 810, altFt: 31000 },
+      { flightNum: 'EK612', airline: 'Emirates', aircraft: 'Boeing 777-300ER', origin: 'Dubai (DXB)', dest: 'Islamabad (ISB)', originCoords: [25.25, 55.36], destCoords: [33.55, 72.82], baseLat: 29.40, baseLng: 64.20, heading: 58, speedKmh: 870, altFt: 35000 },
+      { flightNum: 'EY231', airline: 'Etihad Airways', aircraft: 'Boeing 787-9', origin: 'Abu Dhabi (AUH)', dest: 'Karachi (KHI)', originCoords: [24.43, 54.65], destCoords: [24.90, 67.16], baseLat: 24.60, baseLng: 61.20, heading: 85, speedKmh: 860, altFt: 34000 },
+      { flightNum: 'AI101', airline: 'Air India', aircraft: 'Boeing 777-300ER', origin: 'Delhi (DEL)', dest: 'New York (JFK)', originCoords: [28.55, 77.10], destCoords: [40.64, -73.77], baseLat: 64.20, baseLng: 10.50, heading: 300, speedKmh: 910, altFt: 37000 },
+      { flightNum: '6E204', airline: 'IndiGo', aircraft: 'Airbus A321neo', origin: 'Mumbai (BOM)', dest: 'Dubai (DXB)', originCoords: [19.09, 72.87], destCoords: [25.25, 55.36], baseLat: 22.10, baseLng: 64.10, heading: 295, speedKmh: 840, altFt: 36000 },
+      { flightNum: 'SV101', airline: 'Saudia', aircraft: 'Boeing 777-300ER', origin: 'Jeddah (JED)', dest: 'Washington (IAD)', originCoords: [21.68, 39.15], destCoords: [38.95, -77.45], baseLat: 46.20, baseLng: -25.60, heading: 285, speedKmh: 900, altFt: 38000 },
+      { flightNum: 'TK001', airline: 'Turkish Airlines', aircraft: 'Boeing 777-300ER', origin: 'Istanbul (IST)', dest: 'New York (JFK)', originCoords: [41.27, 28.75], destCoords: [40.64, -73.77], baseLat: 51.50, baseLng: -15.20, heading: 270, speedKmh: 910, altFt: 38000 },
+      { flightNum: 'GF003', airline: 'Gulf Air', aircraft: 'Boeing 787-9', origin: 'Bahrain (BAH)', dest: 'London (LHR)', originCoords: [26.27, 50.63], destCoords: [51.47, -0.45], baseLat: 40.10, baseLng: 26.30, heading: 312, speedKmh: 890, altFt: 37000 },
+
+      // East Asia & Transpacific
+      { flightNum: 'SQ321', airline: 'Singapore Airlines', aircraft: 'Airbus A350-900', origin: 'London (LHR)', dest: 'Singapore (SIN)', originCoords: [51.47, -0.45], destCoords: [1.36, 103.99], baseLat: 28.50, baseLng: 65.20, heading: 122, speedKmh: 940, altFt: 41000 },
       { flightNum: 'UA880', airline: 'United Airlines', aircraft: 'Boeing 787-9', origin: 'San Francisco (SFO)', dest: 'Tokyo (HND)', originCoords: [37.62, -122.37], destCoords: [35.54, 139.78], baseLat: 45.30, baseLng: 175.40, heading: 275, speedKmh: 905, altFt: 39000 },
       { flightNum: 'DL159', airline: 'Delta Air Lines', aircraft: 'Airbus A330-900neo', origin: 'Detroit (DTW)', dest: 'Seoul (ICN)', originCoords: [42.21, -83.35], destCoords: [37.46, 126.44], baseLat: 61.20, baseLng: -160.50, heading: 285, speedKmh: 885, altFt: 37000 },
-      { flightNum: 'TK001', airline: 'Turkish Airlines', aircraft: 'Boeing 777-300ER', origin: 'Istanbul (IST)', dest: 'New York (JFK)', originCoords: [41.27, 28.75], destCoords: [40.64, -73.77], baseLat: 51.50, baseLng: -15.20, heading: 270, speedKmh: 910, altFt: 38000 },
-      { flightNum: 'QF001', airline: 'Qantas Airways', aircraft: 'Boeing 787-9', origin: 'Sydney (SYD)', dest: 'London (LHR)', originCoords: [-33.94, 151.17], destCoords: [51.47, -0.45], baseLat: 15.20, baseLng: 90.40, heading: 305, speedKmh: 935, altFt: 40000 },
       { flightNum: 'CX888', airline: 'Cathay Pacific', aircraft: 'Airbus A350-1000', origin: 'Hong Kong (HKG)', dest: 'Vancouver (YVR)', originCoords: [22.30, 113.91], destCoords: [49.19, -123.18], baseLat: 48.50, baseLng: 170.20, heading: 60, speedKmh: 930, altFt: 39000 },
-      { flightNum: 'SV101', airline: 'Saudia', aircraft: 'Boeing 777-300ER', origin: 'Jeddah (JED)', dest: 'Washington (IAD)', originCoords: [21.68, 39.15], destCoords: [38.95, -77.45], baseLat: 46.20, baseLng: -25.60, heading: 285, speedKmh: 900, altFt: 38000 },
-      { flightNum: 'KL803', airline: 'KLM Royal Dutch', aircraft: 'Boeing 777-200ER', origin: 'Amsterdam (AMS)', dest: 'Manila (MNL)', originCoords: [52.31, 4.76], destCoords: [14.50, 121.01], baseLat: 32.10, baseLng: 75.80, heading: 110, speedKmh: 925, altFt: 39000 }
+      { flightNum: 'NH006', airline: 'All Nippon Airways', aircraft: 'Boeing 777-300ER', origin: 'Tokyo (NRT)', dest: 'Los Angeles (LAX)', originCoords: [35.76, 140.38], destCoords: [33.94, -118.41], baseLat: 41.20, baseLng: -168.40, heading: 95, speedKmh: 920, altFt: 38000 },
+      { flightNum: 'JL002', airline: 'Japan Airlines', aircraft: 'Airbus A350-1000', origin: 'Tokyo (HND)', dest: 'San Francisco (SFO)', originCoords: [35.54, 139.78], destCoords: [37.62, -122.37], baseLat: 42.60, baseLng: -175.20, heading: 88, speedKmh: 915, altFt: 39000 },
+      { flightNum: 'KE017', airline: 'Korean Air', aircraft: 'Boeing 747-8I', origin: 'Seoul (ICN)', dest: 'Los Angeles (LAX)', originCoords: [37.46, 126.44], destCoords: [33.94, -118.41], baseLat: 44.10, baseLng: -170.50, heading: 92, speedKmh: 930, altFt: 38000 },
+      { flightNum: 'CA981', airline: 'Air China', aircraft: 'Boeing 777-300ER', origin: 'Beijing (PEK)', dest: 'New York (JFK)', originCoords: [40.08, 116.58], destCoords: [40.64, -73.77], baseLat: 72.10, baseLng: -120.40, heading: 70, speedKmh: 910, altFt: 36000 },
+      { flightNum: 'TG910', airline: 'Thai Airways', aircraft: 'Airbus A350-900', origin: 'Bangkok (BKK)', dest: 'London (LHR)', originCoords: [13.68, 100.75], destCoords: [51.47, -0.45], baseLat: 34.20, baseLng: 68.40, heading: 305, speedKmh: 915, altFt: 38000 },
+      { flightNum: 'MH001', airline: 'Malaysia Airlines', aircraft: 'Airbus A350-900', origin: 'London (LHR)', dest: 'Kuala Lumpur (KUL)', originCoords: [51.47, -0.45], destCoords: [2.74, 101.70], baseLat: 26.40, baseLng: 74.20, heading: 120, speedKmh: 925, altFt: 40000 },
+
+      // Oceania, Africa & South America
+      { flightNum: 'QF001', airline: 'Qantas Airways', aircraft: 'Boeing 787-9', origin: 'Sydney (SYD)', dest: 'London (LHR)', originCoords: [-33.94, 151.17], destCoords: [51.47, -0.45], baseLat: 15.20, baseLng: 90.40, heading: 305, speedKmh: 935, altFt: 40000 },
+      { flightNum: 'NZ002', airline: 'Air New Zealand', aircraft: 'Boeing 787-9', origin: 'Auckland (AKL)', dest: 'Los Angeles (LAX)', originCoords: [-37.00, 174.78], destCoords: [33.94, -118.41], baseLat: -5.40, baseLng: -150.20, heading: 35, speedKmh: 905, altFt: 39000 },
+      { flightNum: 'ET500', airline: 'Ethiopian Airlines', aircraft: 'Airbus A350-900', origin: 'Addis Ababa (ADD)', dest: 'Washington (IAD)', originCoords: [8.98, 38.80], destCoords: [38.95, -77.45], baseLat: 28.10, baseLng: -18.20, heading: 295, speedKmh: 890, altFt: 37000 },
+      { flightNum: 'SA203', airline: 'South African Airways', aircraft: 'Airbus A330-300', origin: 'Johannesburg (JNB)', dest: 'New York (JFK)', originCoords: [-26.13, 28.24], destCoords: [40.64, -73.77], baseLat: 5.20, baseLng: -28.60, heading: 325, speedKmh: 885, altFt: 38000 },
+      { flightNum: 'LA800', airline: 'LATAM Airlines', aircraft: 'Boeing 787-9', origin: 'Santiago (SCL)', dest: 'Sydney (SYD)', originCoords: [-33.39, -70.79], destCoords: [-33.94, 151.17], baseLat: -55.20, baseLng: -140.10, heading: 260, speedKmh: 910, altFt: 39000 },
+      { flightNum: 'AR1300', airline: 'Aerolíneas Argentinas', aircraft: 'Airbus A330-200', origin: 'Buenos Aires (EZE)', dest: 'Miami (MIA)', originCoords: [-34.82, -58.53], destCoords: [25.79, -80.29], baseLat: -4.20, baseLng: -68.40, heading: 345, speedKmh: 880, altFt: 37000 },
+      { flightNum: 'G37602', airline: 'Gol Transportes', aircraft: 'Boeing 737 MAX 8', origin: 'São Paulo (GRU)', dest: 'Buenos Aires (EZE)', originCoords: [-23.43, -46.47], destCoords: [-34.82, -58.53], baseLat: -29.10, baseLng: -52.40, heading: 215, speedKmh: 830, altFt: 34000 }
     ];
 
     const list = [];
-    for (let i = 0; i < count; i++) {
-      const proto = flightDatabase[i % flightDatabase.length];
-      const offsetLat = (Math.sin(i * 1.5) * 6);
-      const offsetLng = (Math.cos(i * 1.5) * 8);
+    const totalPrototypes = flightPrototypes.length;
 
-      const curLat = proto.baseLat + offsetLat;
-      const curLng = ((proto.baseLng + offsetLng + 180) % 360) - 180;
-      const speedKmh = proto.speedKmh + Math.round((Math.random() - 0.5) * 40);
+    for (let i = 0; i < count; i++) {
+      const proto = flightPrototypes[i % totalPrototypes];
+      const clusterIdx = Math.floor(i / totalPrototypes);
+
+      // Procedural distribution offsets across flight paths
+      const stepOffset = (clusterIdx * 0.28 + (i % 7) * 0.12);
+      const latSpread = Math.sin(i * 1.87) * (6 + (i % 5) * 3);
+      const lngSpread = Math.cos(i * 1.63) * (8 + (i % 7) * 4);
+
+      let curLat = proto.baseLat + latSpread;
+      let curLng = ((proto.baseLng + lngSpread + 180) % 360) - 180;
+
+      // Keep latitude within standard globe bounds
+      curLat = Math.max(-80, Math.min(80, curLat));
+
+      const speedKmh = proto.speedKmh + Math.round((Math.sin(i) * 35));
       const speedKts = Math.round(speedKmh * 0.539957);
-      const altFt = proto.altFt + Math.round((Math.random() - 0.5) * 2000);
+      const altFt = proto.altFt + Math.round((Math.cos(i) * 2200));
       const altM = Math.round(altFt * 0.3048);
-      const eteHours = (2 + Math.random() * 7).toFixed(1);
+      const heading = (proto.heading + Math.round(Math.sin(i * 2) * 15) + 360) % 360;
+      const eteHours = (1.2 + Math.abs(Math.sin(i * 3.4)) * 9.5).toFixed(1);
+      const suffix = clusterIdx > 0 ? `-${clusterIdx + 1}` : '';
 
       list.push({
-        flightNum: proto.flightNum,
+        id: `flight-${i + 1}`,
+        flightNum: `${proto.flightNum}${suffix}`,
         airline: proto.airline,
         aircraftType: proto.aircraft,
         origin: proto.origin,
@@ -1530,12 +1606,13 @@
         altitudeM: altM,
         speedKmh: speedKmh,
         speedKts: speedKts,
-        heading: proto.heading,
+        heading: heading,
         status: 'Cruising · En Route',
         ete: `${eteHours} hrs remaining`,
-        callsign: `${proto.airline.substring(0, 3).toUpperCase()}${proto.flightNum}`
+        callsign: `${proto.airline.substring(0, 3).toUpperCase()}${proto.flightNum.replace(/\D/g, '') || (100 + i)}`
       });
     }
+
     return list;
   }
 

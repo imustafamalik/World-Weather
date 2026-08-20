@@ -1495,6 +1495,10 @@ a:hover {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
+.plane-div-icon {
+  transition: transform 0.95s linear !important;
+}
+
 .layer-zoom-1m-btn, .layer-download-tiles-btn {
   display: flex;
   align-items: center;
